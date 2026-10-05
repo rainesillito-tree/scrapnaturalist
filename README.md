@@ -69,3 +69,6 @@ Add `--crop x0,y0,x1,y1` (fractions or pixels) to lift one object out of a busy 
 ## Credits
 
 See `CREDITS.md`. Photochrom and cabinet-card scans are from the Library of Congress (public domain).
+
+## The drawn ornaments
+The esoteric symbols and botanicals in LOOSE SPECIMENS (eyes, moons, keys, ferns, roses and so on) were drawn from scratch by `tools/draw_ornaments.py` and are released to the public domain (CC0). Edit the script and run it to draw your own.

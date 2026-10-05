@@ -123,16 +123,6 @@
         return out;
       });
     } },
-    iconify: { label: "Iconify (silhouettes & emoji art, SVG)", search: function (q, page) {
-      var LIC = { "game-icons": "game-icons.net, CC BY 3.0", "noto": "Noto Emoji, Apache 2.0", "fluent-emoji-flat": "Fluent Emoji, MIT" };
-      var u = "https://api.iconify.design/search?query=" + encodeURIComponent(q) + "&limit=40&start=" + (page * 40) + "&prefixes=game-icons,noto,fluent-emoji-flat";
-      return jget(u).then(function (d) {
-        return (d.icons || []).map(function (n) {
-          var p = n.split(":"), base = "https://api.iconify.design/" + p[0] + "/" + p[1] + ".svg";
-          return { id: "ico-" + p[0] + "-" + p[1], title: p[1].replace(/-/g, " "), thumb: base + "?height=200", image: base + "?height=600", w: 600, h: 600, alpha: true, credit: LIC[p[0]] || p[0], link: "https://icon-sets.iconify.design/" + p[0] + "/" + p[1] + "/" };
-        });
-      });
-    } },
     commonssvg: { label: "Wikimedia Commons (drawings & SVG)", search: function (q, page) {
       var u = "https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=40&gsroffset=" + (page * 40) + "&gsrsearch=" + encodeURIComponent(q + " filetype:drawing") + "&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1000&iiextmetadatafilter=LicenseShortName|Artist";
       return jget(u).then(function (d) {
@@ -214,11 +204,11 @@
     toast("PICKED UP.");
   }
   function openWider() {
-    var h = '<h2>THE WIDER FIELD</h2><p class="sub">borrow from the great open collections. public-domain and freely licensed finds only, each carrying its credit. tap one to carry it back to camp.</p>' +
+    var h = '<h2>THE WIDER FIELD</h2><p class="sub">borrow from the great open collections. public-domain finds only. tap one to carry it back to camp.</p>' +
       '<div class="wf-bar"><select id="wfSrc" class="sel" aria-label="Collection">' + Object.keys(SOURCES).map(function (k) { return '<option value="' + k + '"' + (k === WF.src ? " selected" : "") + ">" + SOURCES[k].label + "</option>"; }).join("") + '</select>' +
       '<input id="wfQ" type="search" placeholder="what are you hunting for?" value="' + esc(WF.q) + '"><button class="btn primary" id="wfGo">LOOK</button></div>' +
       '<div class="wf-chips">' + CHIPS.map(function (c) { return '<button class="chip" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
-      '<p class="sub wf-eso">CLIP ART · flourishes, frames, creatures and ornaments that already come free of their background</p><div class="wf-chips">' + CHIPS_ART.map(function (c) { return '<button class="chip art" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
+      '<p class="sub wf-eso">CLIP ART · public-domain drawings and diagrams from Wikimedia Commons, already free of their background</p><div class="wf-chips">' + CHIPS_ART.map(function (c) { return '<button class="chip art" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
       '<p class="sub wf-eso">ESOTERICA · eyes, hands, hearts, alchemy and other odd old things (Wellcome Collection)</p><div class="wf-chips">' + CHIPS_ESO.map(function (c) { return '<button class="chip eso" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
       '<p class="wf-msg" id="wfMsg">' + (WF.results.length ? "" : "try a word. any word. see what turns up.") + '</p><div class="bg-grid wf-grid" id="wfGrid"></div><div class="row"><button class="btn" id="wfMore" hidden>MORE</button></div>';
     openModal(h); drawResults();
@@ -242,7 +232,7 @@
     $("#wfGo").onclick = function () { go(false); };
     $("#wfMore").onclick = function () { go(true); };
     $("#wfQ").onkeydown = function (e) { if (e.key === "Enter") go(false); };
-    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; if (c.classList.contains("art")) $("#wfSrc").value = "iconify"; go(false); }; });
+    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; if (c.classList.contains("art")) $("#wfSrc").value = "commonssvg"; go(false); }; });
     if (WF.results.length) $("#wfMore").hidden = false;
   }
   $("#btnWide").onclick = openWider;

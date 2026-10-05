@@ -6,3 +6,6 @@
 
 ## Cut-outs from Unsplash photographs
 The neon moon, moon mural, eucalyptus hand, red car and four tarot cards were cut from photographs on Unsplash, used under the Unsplash License (free to use and modify; credit to the photographers is welcome). Individual photographers can be named here when known.
+
+## Drawn ornaments
+The `orn-*` specimens were drawn in code for this project and dedicated to the public domain (CC0).
