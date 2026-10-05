@@ -75,3 +75,6 @@ The esoteric symbols and botanicals in LOOSE SPECIMENS (eyes, moons, keys, ferns
 
 ## Your own pieces
 "Your own pieces" lets a visitor add up to two pictures of their own and lift the background off them (in the browser, using a small U²-Net model; see CREDITS.md). They are kept in that browser's localStorage only (`cl.mine`) and are never uploaded.
+
+## Clipped words
+CLIPPED WORDS holds about a hundred magazine-style word and line clippings, made by `tools/make_words.py` from plain text set in open-licence fonts (Lora, Inter, Liberation, GFS Baskerville, DejaVu), so they are free to use. Edit the word lists at the top of the script and run it to make your own.
