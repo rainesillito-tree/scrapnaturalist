@@ -123,11 +123,13 @@
         return out;
       });
     } },
-    openverse: { label: "Openverse (free clip art, SVG)", search: function (q, page) {
-      var u = "https://api.openverse.org/v1/images/?q=" + encodeURIComponent(q) + "&license=cc0,pdm&extension=svg&page_size=40&page=" + (page + 1);
+    iconify: { label: "Iconify (silhouettes & emoji art, SVG)", search: function (q, page) {
+      var LIC = { "game-icons": "game-icons.net, CC BY 3.0", "noto": "Noto Emoji, Apache 2.0", "fluent-emoji-flat": "Fluent Emoji, MIT" };
+      var u = "https://api.iconify.design/search?query=" + encodeURIComponent(q) + "&limit=40&start=" + (page * 40) + "&prefixes=game-icons,noto,fluent-emoji-flat";
       return jget(u).then(function (d) {
-        return (d.results || []).filter(function (x) { return x.url; }).map(function (x) {
-          return { id: "ov-" + x.id, title: String(x.title || "Clip art").slice(0, 80), thumb: x.thumbnail || x.url, image: x.url, w: x.width || 800, h: x.height || 800, alpha: true, credit: String(x.source || "Openverse").replace(/_/g, " ") + (x.creator ? ", " + x.creator : "") + " (" + String(x.license || "cc0").toUpperCase() + ")", link: x.foreign_landing_url || x.url };
+        return (d.icons || []).map(function (n) {
+          var p = n.split(":"), base = "https://api.iconify.design/" + p[0] + "/" + p[1] + ".svg";
+          return { id: "ico-" + p[0] + "-" + p[1], title: p[1].replace(/-/g, " "), thumb: base + "?height=200", image: base + "?height=600", w: 600, h: 600, alpha: true, credit: LIC[p[0]] || p[0], link: "https://icon-sets.iconify.design/" + p[0] + "/" + p[1] + "/" };
         });
       });
     } },
@@ -212,7 +214,7 @@
     toast("PICKED UP.");
   }
   function openWider() {
-    var h = '<h2>THE WIDER FIELD</h2><p class="sub">borrow from the great open collections. public-domain finds only. tap one to carry it back to camp.</p>' +
+    var h = '<h2>THE WIDER FIELD</h2><p class="sub">borrow from the great open collections. public-domain and freely licensed finds only, each carrying its credit. tap one to carry it back to camp.</p>' +
       '<div class="wf-bar"><select id="wfSrc" class="sel" aria-label="Collection">' + Object.keys(SOURCES).map(function (k) { return '<option value="' + k + '"' + (k === WF.src ? " selected" : "") + ">" + SOURCES[k].label + "</option>"; }).join("") + '</select>' +
       '<input id="wfQ" type="search" placeholder="what are you hunting for?" value="' + esc(WF.q) + '"><button class="btn primary" id="wfGo">LOOK</button></div>' +
       '<div class="wf-chips">' + CHIPS.map(function (c) { return '<button class="chip" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
@@ -240,7 +242,7 @@
     $("#wfGo").onclick = function () { go(false); };
     $("#wfMore").onclick = function () { go(true); };
     $("#wfQ").onkeydown = function (e) { if (e.key === "Enter") go(false); };
-    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; if (c.classList.contains("art")) $("#wfSrc").value = "openverse"; go(false); }; });
+    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; if (c.classList.contains("art")) $("#wfSrc").value = "iconify"; go(false); }; });
     if (WF.results.length) $("#wfMore").hidden = false;
   }
   $("#btnWide").onclick = openWider;
