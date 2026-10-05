@@ -503,7 +503,6 @@ PIECES = [
     ("moon-face", "A Crescent Moon With a Sleeping Face", "things", ["moon", "face", "crescent", "stars"], moon_face),
     ("sun-face", "A Sun With Its Eyes Shut", "things", ["sun", "face", "rays", "esoteric"], sun_face),
     ("compass-star", "A Compass Star", "things", ["star", "compass", "rose", "navigation"], compass_star),
-    ("palm-hand", "An Open Hand With an Eye in the Palm", "things", ["hand", "eye", "palm", "esoteric"], palm_hand),
     ("skeleton-key", "A Skeleton Key", "things", ["key", "skeleton key", "brass"], skeleton_key),
     ("crystal-ball", "A Crystal Ball on Its Stand", "things", ["crystal ball", "scrying", "stars", "esoteric"], crystal_ball),
     ("ouroboros", "The Snake Who Eats Its Tail", "things", ["ouroboros", "snake", "circle", "esoteric"], ouroboros),

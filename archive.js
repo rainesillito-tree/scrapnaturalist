@@ -894,7 +894,6 @@
     { id:"orn-moon-face-cut", category:"cutouts", group:"things", title:"A Crescent Moon With a Sleeping Face", image:"images/cutouts/orn-moon-face.webp", w:645, h:635, alpha:true, tags:["moon", "face", "crescent", "stars"] },
     { id:"orn-sun-face-cut", category:"cutouts", group:"things", title:"A Sun With Its Eyes Shut", image:"images/cutouts/orn-sun-face.webp", w:770, h:770, alpha:true, tags:["sun", "face", "rays", "esoteric"] },
     { id:"orn-compass-star-cut", category:"cutouts", group:"things", title:"A Compass Star", image:"images/cutouts/orn-compass-star.webp", w:766, h:766, alpha:true, tags:["star", "compass", "rose", "navigation"] },
-    { id:"orn-palm-hand-cut", category:"cutouts", group:"things", title:"An Open Hand With an Eye in the Palm", image:"images/cutouts/orn-palm-hand.webp", w:493, h:900, alpha:true, tags:["hand", "eye", "palm", "esoteric"] },
     { id:"orn-skeleton-key-cut", category:"cutouts", group:"things", title:"A Skeleton Key", image:"images/cutouts/orn-skeleton-key.webp", w:316, h:778, alpha:true, tags:["key", "skeleton key", "brass"] },
     { id:"orn-crystal-ball-cut", category:"cutouts", group:"things", title:"A Crystal Ball on Its Stand", image:"images/cutouts/orn-crystal-ball.webp", w:542, h:741, alpha:true, tags:["crystal ball", "scrying", "stars", "esoteric"] },
     { id:"orn-ouroboros-cut", category:"cutouts", group:"things", title:"The Snake Who Eats Its Tail", image:"images/cutouts/orn-ouroboros.webp", w:613, h:684, alpha:true, tags:["ouroboros", "snake", "circle", "esoteric"] },
