@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Scrap Naturalist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-view="home">
+
+<main id="views">
+
+  <!-- HOME / COVER -->
+  <section id="home" class="view on" aria-label="The Scrap Naturalist">
+    <div class="cover">
+      <div class="cover-art" id="coverArt" aria-hidden="true"></div>
+      <div class="cover-text">
+        <p class="issue">FIELD JOURNAL &nbsp;·&nbsp; VOL. I &nbsp;·&nbsp; KEEP DRY, KEEP CURIOUS</p>
+        <h1>THE SCRAP NATURALIST</h1>
+        <p class="tag">field notes toward an unlikely herbarium</p>
+        <div class="cover-actions">
+          <button id="btnOpen" class="btn primary big">GO OUT INTO THE FIELD</button>
+          <button id="btnContinue" class="btn big" hidden>BACK TO THE BENCH</button>
+          <button id="btnMine" class="btn link" hidden>PRESSED SHEETS</button>
+          <button id="btnGuide" class="btn link">A SHORT GUIDE TO THE FIELD</button>
+        </div>
+        <p class="fine">this is a place for wandering through old pictures and strange finds, to see what turns up. you notice, you snip out whatever glows, and the pieces ride home in a tin. set side by side, they start to say things you didn't plan.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHIVE -->
+  <section id="archive" class="view dark" aria-label="The field">
+    <header class="bar">
+      <button id="aHome" class="btn small">BASE CAMP</button>
+      <nav id="cats" class="cats" aria-label="Archive sections"></nav>
+    </header>
+    <nav id="subcats" class="subcats" aria-label="Cut-out groups" hidden></nav>
+    <div id="constraintNote" class="note" hidden><span id="constraintText"></span><button id="constraintX" class="x" aria-label="Dismiss">×</button></div>
+    <div id="aStage" class="stage">
+      <button id="prevBtn" class="nav prev" aria-label="Previous page">←</button>
+      <div id="pageBox" class="pagebox"><img id="pageImg" alt="" draggable="false"></div>
+      <button id="nextBtn" class="nav next" aria-label="Next page">→</button>
+    </div>
+    <div class="a-foot">
+      <div class="a-meta"><span id="counter" class="counter"></span><span id="pageTitle" class="ptitle"></span></div>
+      <div class="a-actions">
+        <button id="aPrev" class="btn small mob">← BACK A FOLIO</button>
+        <button id="aNext" class="btn small mob">NEXT FOLIO →</button>
+        <button id="btnCutPage" class="btn primary">TAKE A SNIP</button>
+        <button id="btnTake" class="btn">COLLECT WHOLE</button>
+      </div>
+      <div class="a-tools">
+        <button id="btnIndex" class="btn small">CONTENTS</button>
+        <button id="btnSurprise" class="btn small">WANDER</button>
+        <button id="btnStrange" class="btn small">A STRANGE SIGHTING</button>
+        <button id="btnConstraint" class="btn small">A FIELD RULE</button>
+        <button id="btnWide" class="btn small">THE WIDER FIELD</button>
+        <button id="btnBgPage" class="btn small">USE AS THE GROUND</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUTTING STUDIO -->
+  <section id="cut" class="view dark" aria-label="Cutting studio">
+    <header class="bar">
+      <button id="cBack" class="btn small">← BACK TO THE FIELD</button>
+      <h2 class="bar-title">TAKE A SNIP</h2>
+    </header>
+    <div class="cutbody">
+      <div id="cStage" class="stage cutstage">
+        <div id="cBox" class="cbox"><img id="cImg" alt="" draggable="false"><svg id="cOverlay" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"></svg></div>
+      </div>
+      <aside class="cpanel">
+        <p class="lbl">SCISSOR SHAPE</p>
+        <div id="shapes" class="shapes"></div>
+        <div class="sliders">
+          <label class="lbl" for="cSize">SIZE <input type="range" id="cSize" min="8" max="96" value="38"></label>
+          <label class="lbl" for="cRot">TURN <input type="range" id="cRot" min="-180" max="180" value="0"></label>
+        </div>
+        <button id="btnCut" class="btn primary big">SNIP</button>
+        <button id="btnWhole" class="btn big">TAKE IT WHOLE</button>
+        <p class="hint">drag the outline over your find. two fingers turn it and widen it.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- COLLAGE TABLE -->
+  <section id="table" class="view dark" aria-label="Collage table">
+    <header class="bar tbar">
+      <button id="tBack" class="btn small">← THE FIELD</button>
+      <select id="paperSel" class="sel" aria-label="Paper"></select>
+      <select id="ratioSel" class="sel" aria-label="Proportions"></select>
+      <button id="btnBg" class="btn small">GROUND PHOTO</button>
+      <span class="sp"></span>
+      <button id="btnSave" class="btn small">PRESS &amp; KEEP</button>
+      <button id="btnExport" class="btn small primary">MAKE A PLATE</button>
+      <button id="btnNew" class="btn small">CLEAR THE BENCH</button>
+      <button id="btnMine2" class="btn small">PRESSED SHEETS</button>
+    </header>
+    <div class="tbody">
+      <div id="desk" class="desk">
+        <div id="paper" class="paper"></div>
+        <p id="emptyHint" class="empty-hint">WHAT WANTS TO BECOME OF THESE?<span>tap a specimen to lay it down</span></p>
+        <p id="tConstraint" class="t-constraint" hidden></p>
+      </div>
+      <aside id="tray" class="tray">
+        <p class="lbl">THE TIN</p>
+        <div id="trayList" class="tray-list"></div>
+      </aside>
+    </div>
+    <div id="tools" class="tools" role="toolbar" aria-label="Collage tools"></div>
+  </section>
+
+</main>
+
+<!-- SCRAP DRAWER (archive + cutting studio) -->
+<aside id="drawer" class="drawer" aria-label="Specimen tin">
+  <div class="d-head">
+    <button id="dToggle" class="btn small" aria-expanded="false">▲ SPECIMEN TIN <b id="dCount">0</b></button>
+    <span class="sp"></span>
+    <button id="dAssemble" class="btn primary">TO THE BENCH</button>
+  </div>
+  <div id="dList" class="d-list"></div>
+</aside>
+
+<div id="modal" class="modal" hidden><div id="sheet" class="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="archive.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
