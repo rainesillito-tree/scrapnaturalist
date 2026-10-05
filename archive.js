@@ -899,6 +899,26 @@
     { id:"card-sun-cut", category:"cutouts", group:"things", title:"The Sun (Tarot)", image:"images/cutouts/card-sun-cut.webp", w:498, h:657, alpha:true, tags:["tarot", "card", "sun", "esoteric"] },
 
     { id:"plate-sheet", category:"ephemera", title:"Sheet of Thirty-Two Plates", image:"images/plate-sheet.jpg", w:1536, h:1024, tags:["contact sheet", "plates", "mixed"] },
+    { id:"fog-pines-table", category:"landscapes", title:"A Table Set in the Fog", image:"images/fog-pines-table.jpg", w:1067, h:1600, tags:["fog", "pines", "table", "linen", "forest"] },
+    { id:"flare-signpost", category:"landscapes", title:"Signpost in a Red Light Leak", image:"images/flare-signpost.jpg", w:1600, h:1070, tags:["signpost", "marsh", "light leak", "film", "coast"] },
+    { id:"flare-orchard", category:"landscapes", title:"Orchard Through a Rainbow Leak", image:"images/flare-orchard.jpg", w:1060, h:1600, tags:["orchard", "trees", "film", "light leak", "branches"] },
+    { id:"hill-of-trees", category:"landscapes", title:"The Hill With a Row of Bare Trees", image:"images/hill-of-trees.jpg", w:1600, h:1061, tags:["hill", "silhouette", "sky", "power pole", "dusk"] },
+    { id:"geese-field", category:"landscapes", title:"Two Geese in a Ploughed Field", image:"images/geese-field.jpg", w:1060, h:1600, tags:["geese", "field", "clouds", "film", "light leak"] },
+    { id:"peak-through-trees", category:"landscapes", title:"A Peak Seen Between Trees", image:"images/peak-through-trees.jpg", w:1102, h:1600, tags:["mountain", "trees", "slide", "window", "conifer"] },
+    { id:"stately-gums", category:"print", title:"Stately Gums", image:"images/stately-gums.jpg", w:1283, h:1600, tags:["gum trees", "sepia", "vintage print", "fence", "hills"] },
+    { id:"star-burst", category:"celestial", title:"A Star Coming Apart", image:"images/star-burst.jpg", w:1068, h:1600, tags:["star", "light trails", "night", "long exposure", "sky"] },
+    { id:"eclipse-four", category:"celestial", title:"Four Moons Going Red", image:"images/eclipse-four.jpg", w:900, h:1600, tags:["moon", "eclipse", "blood moon", "phases", "night"] },
+    { id:"crescent-reeds", category:"celestial", title:"Crescent Behind the Reeds", image:"images/crescent-reeds.jpg", w:1166, h:1600, tags:["moon", "crescent", "reeds", "woodblock", "grass"] },
+    { id:"moon-tree-inverted", category:"celestial", title:"The Moon With a Tree for Lungs", image:"images/moon-tree-inverted.jpg", w:1600, h:1199, tags:["moon", "tree", "silhouette", "branches", "night"] },
+    { id:"moon-cactus", category:"celestial", title:"The Moon Setting Behind a Cactus", image:"images/moon-cactus.jpg", w:1600, h:1287, tags:["moon", "cactus", "ridge", "night", "desert"] },
+    { id:"falcon-night", category:"objects", title:"White Falcon, Parked at Night", image:"images/falcon-night.jpg", w:1248, h:1600, tags:["car", "automobile", "night", "street", "building"] },
+    { id:"shiloh-church-wall", category:"architecture", title:"A Small Church, a Pew, a Tree", image:"images/shiloh-church-wall.jpg", w:1600, h:1600, tags:["church", "wall", "bench", "tree", "sign"] },
+    { id:"cabinet-china", category:"objects", title:"The Cupboard of Good Dishes", image:"images/cabinet-china.jpg", w:1600, h:1067, tags:["cupboard", "china", "cups", "shelves", "kitchen"] },
+    { id:"dales-road", category:"landscapes", title:"A Road Going Down Into the Dales", image:"images/dales-road.jpg", w:1600, h:1068, tags:["road", "stone wall", "valley", "slide", "haze"] },
+    { id:"hill-and-shed", category:"landscapes", title:"The Hill With a House on Top", image:"images/hill-and-shed.jpg", w:1600, h:1067, tags:["hill", "field", "shed", "cypress", "storm"] },
+    { id:"pond-and-ducks", category:"landscapes", title:"A Pond, Reeds and Small Ducks", image:"images/pond-and-ducks.jpg", w:1067, h:1600, tags:["pond", "reeds", "ducks", "reflection", "winter"] },
+    { id:"river-rapids", category:"landscapes", title:"The River Hurrying Through Rock", image:"images/river-rapids.jpg", w:1246, h:1600, tags:["river", "rapids", "rocks", "pines", "black and white"] },
+    { id:"mesa-painting", category:"landscapes", title:"Red Cliffs at Sundown, Painted", image:"images/mesa-painting.jpg", w:1600, h:1280, tags:["mesa", "painting", "desert", "cliffs", "sunset"] },
   ];
   MY_IMAGES.forEach(function (it) { archive.push(it); });
   // real images lead each section; the drawn plates follow
