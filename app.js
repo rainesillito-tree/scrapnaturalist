@@ -106,9 +106,9 @@
   $("#modal").addEventListener("pointerdown", function (e) { if (e.target === $("#modal")) closeModal(); });
 
   /* ---------- the wider field: open collections searched from the page ---------- */
-  function jget(url) { return fetch(url, { mode: "cors" }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); }); }
+  function jget(url) { return fetch(url, { mode: "cors" }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.text().then(function (t) { try { return JSON.parse(t); } catch (e) { throw new Error("it has closed its doors or changed its address"); } }); }); }
   function strip(h) { var d = document.createElement("div"); d.innerHTML = h || ""; return (d.textContent || "").trim().slice(0, 90); }
-  function prox(u) { return "https://wsrv.nl/?url=" + encodeURIComponent(u) + "&w=1200&output=jpg"; }
+  function prox(u) { return "https://wsrv.nl/?url=" + encodeURIComponent(u) + "&w=1200"; }
   var SOURCES = {
     wellcome: { label: "Wellcome Collection (esoteric, medical, occult)", search: function (q, page) {
       var u = "https://api.wellcomecollection.org/catalogue/v2/images?query=" + encodeURIComponent(q) + "&locations.license=pdm,cc0&pageSize=40&page=" + (page + 1);
@@ -123,12 +123,11 @@
         return out;
       });
     } },
-    openclipart: { label: "Openclipart (SVG clip art)", search: function (q, page) {
-      var u = "https://openclipart.org/search/json/?query=" + encodeURIComponent(q) + "&amount=40&page=" + (page + 1);
+    openverse: { label: "Openverse (free clip art, SVG)", search: function (q, page) {
+      var u = "https://api.openverse.org/v1/images/?q=" + encodeURIComponent(q) + "&license=cc0,pdm&extension=svg&page_size=40&page=" + (page + 1);
       return jget(u).then(function (d) {
-        return (d.payload || []).filter(function (x) { return x.svg; }).map(function (x) {
-          var s = x.svg, big = s.png_full_lossy || s.png_2400px || s.png_thumb || s.url;
-          return { id: "ocl-" + x.id, title: String(x.title || "Clip art").slice(0, 80), thumb: s.png_thumb || big, image: big, w: 800, h: 800, alpha: true, credit: "Openclipart" + (x.uploader ? ", " + x.uploader : "") + " (public domain)", link: x.detail_link || "https://openclipart.org" };
+        return (d.results || []).filter(function (x) { return x.url; }).map(function (x) {
+          return { id: "ov-" + x.id, title: String(x.title || "Clip art").slice(0, 80), thumb: x.thumbnail || x.url, image: x.url, w: x.width || 800, h: x.height || 800, alpha: true, credit: String(x.source || "Openverse").replace(/_/g, " ") + (x.creator ? ", " + x.creator : "") + " (" + String(x.license || "cc0").toUpperCase() + ")", link: x.foreign_landing_url || x.url };
         });
       });
     } },
@@ -241,7 +240,7 @@
     $("#wfGo").onclick = function () { go(false); };
     $("#wfMore").onclick = function () { go(true); };
     $("#wfQ").onkeydown = function (e) { if (e.key === "Enter") go(false); };
-    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; if (c.classList.contains("art")) $("#wfSrc").value = "openclipart"; go(false); }; });
+    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; if (c.classList.contains("art")) $("#wfSrc").value = "openverse"; go(false); }; });
     if (WF.results.length) $("#wfMore").hidden = false;
   }
   $("#btnWide").onclick = openWider;
@@ -774,7 +773,7 @@
     function tryOne(u, cors) { return new Promise(function (res, rej) { var i = new Image(); if (cors) i.crossOrigin = "anonymous"; i.onload = function () { res(i); }; i.onerror = function () { rej(new Error("image")); }; i.src = u; }); }
     var p = !remote ? tryOne(url, false) : tryOne(url, true)
       .catch(function () { return tryOne(prox(url), true); })
-      .catch(function () { return tryOne("https://images.weserv.nl/?url=" + encodeURIComponent(url) + "&w=1200&output=jpg", true); });
+      .catch(function () { return tryOne("https://images.weserv.nl/?url=" + encodeURIComponent(url) + "&w=1200", true); });
     return imgCache[url] = p;
   }
   var MISSED = 0;
