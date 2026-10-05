@@ -123,6 +123,28 @@
         return out;
       });
     } },
+    openclipart: { label: "Openclipart (SVG clip art)", search: function (q, page) {
+      var u = "https://openclipart.org/search/json/?query=" + encodeURIComponent(q) + "&amount=40&page=" + (page + 1);
+      return jget(u).then(function (d) {
+        return (d.payload || []).filter(function (x) { return x.svg; }).map(function (x) {
+          var s = x.svg, big = s.png_full_lossy || s.png_2400px || s.png_thumb || s.url;
+          return { id: "ocl-" + x.id, title: String(x.title || "Clip art").slice(0, 80), thumb: s.png_thumb || big, image: big, w: 800, h: 800, alpha: true, credit: "Openclipart" + (x.uploader ? ", " + x.uploader : "") + " (public domain)", link: x.detail_link || "https://openclipart.org" };
+        });
+      });
+    } },
+    commonssvg: { label: "Wikimedia Commons (drawings & SVG)", search: function (q, page) {
+      var u = "https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=40&gsroffset=" + (page * 40) + "&gsrsearch=" + encodeURIComponent(q + " filetype:drawing") + "&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1000&iiextmetadatafilter=LicenseShortName|Artist";
+      return jget(u).then(function (d) {
+        var pg = d.query && d.query.pages ? Object.keys(d.query.pages).map(function (k) { return d.query.pages[k]; }) : [], out = [];
+        pg.forEach(function (p) {
+          var ii = p.imageinfo && p.imageinfo[0]; if (!ii || !ii.thumburl) return;
+          var lic = (ii.extmetadata && ii.extmetadata.LicenseShortName && ii.extmetadata.LicenseShortName.value) || "";
+          if (!/public domain|cc0|^pd/i.test(lic)) return;
+          out.push({ id: "csvg-" + p.pageid, title: p.title.replace(/^File:/, "").replace(/\.[a-z]+$/i, "").replace(/_/g, " ").slice(0, 80), thumb: ii.thumburl, image: ii.thumburl, w: ii.thumbwidth, h: ii.thumbheight, alpha: true, credit: "Wikimedia Commons (" + lic + ")", link: ii.descriptionurl });
+        });
+        return out;
+      });
+    } },
     commons: { label: "Wikimedia Commons", search: function (q, page) {
       var u = "https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=40&gsroffset=" + (page * 40) + "&gsrsearch=" + encodeURIComponent(q + " filetype:bitmap") + "&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1200&iiextmetadatafilter=LicenseShortName|Artist";
       return jget(u).then(function (d) {
@@ -170,10 +192,11 @@
   };
   var WF = { src: "commons", q: "", page: 0, results: [], busy: false };
   var CHIPS = ["photochrom", "tintype", "cabinet card", "herbarium", "engraved bird", "teapot", "automobile 1920", "chair", "ship", "map", "moth", "cathedral"];
+  var CHIPS_ART = ["flourish", "ornament", "banner", "frame", "crown", "key", "bird", "hand", "eye", "arrow", "star", "ribbon"];
   var CHIPS_ESO = ["eye", "anatomical eye", "alchemy", "astrology", "palmistry", "skull", "occult", "witchcraft", "demon", "sea monster", "ouroboros", "phrenology", "mushroom", "heart", "hand", "skeleton"];
   function addFound(r) {
     var probe = new Image();
-    probe.onload = function () { saveFound(r); };
+    probe.onload = function () { if (probe.naturalWidth) { r.w = probe.naturalWidth; r.h = probe.naturalHeight; } saveFound(r); };
     probe.onerror = function () { r.image = prox(r.image); r.thumb = prox(r.thumb); saveFound(r); };
     probe.src = r.image;
   }
@@ -181,7 +204,8 @@
     var it = byId[r.id];
     if (!it) {
       it = { id: r.id, category: "found", title: r.title, image: r.image, w: r.w, h: r.h, tags: [], credit: r.credit, link: r.link, web: true };
-      ARCH.push(it); byId[it.id] = it; PAGES.push(it);
+      if (r.alpha) it.alpha = true;
+      ARCH.push(it); byId[it.id] = it; if (!it.alpha) PAGES.push(it);
       FOUND.push(it); FOUND = FOUND.slice(-60); try { localStorage.setItem("cl.found", JSON.stringify(FOUND)); } catch (e) {}
     }
     closeModal(); setCat("found", 0);
@@ -193,6 +217,7 @@
       '<div class="wf-bar"><select id="wfSrc" class="sel" aria-label="Collection">' + Object.keys(SOURCES).map(function (k) { return '<option value="' + k + '"' + (k === WF.src ? " selected" : "") + ">" + SOURCES[k].label + "</option>"; }).join("") + '</select>' +
       '<input id="wfQ" type="search" placeholder="what are you hunting for?" value="' + esc(WF.q) + '"><button class="btn primary" id="wfGo">LOOK</button></div>' +
       '<div class="wf-chips">' + CHIPS.map(function (c) { return '<button class="chip" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
+      '<p class="sub wf-eso">CLIP ART · flourishes, frames, creatures and ornaments that already come free of their background</p><div class="wf-chips">' + CHIPS_ART.map(function (c) { return '<button class="chip art" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
       '<p class="sub wf-eso">ESOTERICA · eyes, hands, hearts, alchemy and other odd old things (Wellcome Collection)</p><div class="wf-chips">' + CHIPS_ESO.map(function (c) { return '<button class="chip eso" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
       '<p class="wf-msg" id="wfMsg">' + (WF.results.length ? "" : "try a word. any word. see what turns up.") + '</p><div class="bg-grid wf-grid" id="wfGrid"></div><div class="row"><button class="btn" id="wfMore" hidden>MORE</button></div>';
     openModal(h); drawResults();
@@ -216,7 +241,7 @@
     $("#wfGo").onclick = function () { go(false); };
     $("#wfMore").onclick = function () { go(true); };
     $("#wfQ").onkeydown = function (e) { if (e.key === "Enter") go(false); };
-    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; go(false); }; });
+    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; if (c.classList.contains("art")) $("#wfSrc").value = "openclipart"; go(false); }; });
     if (WF.results.length) $("#wfMore").hidden = false;
   }
   $("#btnWide").onclick = openWider;
@@ -227,7 +252,7 @@
       ["GO OUT", "wander the folios: terrain, ruins, curios, the human animal. nothing here is for sale. all of it is for cutting."],
       ["TAKE A SNIP", "choose a scissor shape, lay it over whatever caught your eye, and cut. or collect a loose specimen whole."],
       ["FILL THE TIN", "every find rides in the specimen tin along the bottom. it remembers you between visits."],
-      ["GO TO THE BENCH", "lay your finds on a sheet of paper, or on a photograph if you want a ground to stand on."],
+      ["GO TO THE WORKBENCH", "lay your finds on a sheet of paper, or on a photograph if you want a ground to stand on."],
       ["ARRANGE, TURN, PASTE DOWN", "drag, turn, widen, flip. lift a piece up again if you change your mind. undo is always allowed."],
       ["PRESS A PLATE", "press the sheet to keep it here, or make a plate (a PNG) to carry home."]
     ];
@@ -576,7 +601,7 @@
   /* ---------- table: tools ---------- */
   var TOOLS = [
     ["undo", "UNDO"], ["redo", "REDO"], ["|"], ["rotate", "ROTATE"], ["flipH", "FLIP ↔"], ["flipV", "FLIP ↕"], ["dup", "DUPLICATE"], ["|"],
-    ["fwd", "FORWARD"], ["back", "BACK"], ["front", "TO FRONT"], ["backmost", "TO BACK"], ["|"], ["glue", "PASTE DOWN"], ["del", "DISCARD"], ["|"], ["clear", "CLEAR BENCH"]
+    ["fwd", "FORWARD"], ["back", "BACK"], ["front", "TO FRONT"], ["backmost", "TO BACK"], ["|"], ["glue", "PASTE DOWN"], ["del", "DISCARD"], ["|"], ["clear", "CLEAR WORKBENCH"]
   ];
   $("#tools").innerHTML = TOOLS.map(function (t) { return t[0] === "|" ? '<span class="gap"></span>' : '<button class="btn" data-a="' + t[0] + '">' + t[1] + "</button>"; }).join("");
   function renderTools() {
@@ -597,7 +622,7 @@
   function doTool(a) {
     var it = SEL ? getItem(SEL) : null;
     if (a === "undo") return undo(); if (a === "redo") return redo();
-    if (a === "clear") { ask("clear the bench? every specimen comes off.", "CLEAR BENCH").then(function (y) { if (y) act(function () { T.items = []; SEL = null; }); }); return; }
+    if (a === "clear") { ask("clear the workbench? every specimen comes off.", "CLEAR WORKBENCH").then(function (y) { if (y) act(function () { T.items = []; SEL = null; }); }); return; }
     if (!it) return;
     var i = T.items.indexOf(it);
     act(function () {
@@ -782,7 +807,7 @@
     });
   }
   $("#btnExport").onclick = function () {
-    if (!T.items.length) { toast("THE BENCH IS EMPTY."); return; }
+    if (!T.items.length) { toast("THE WORKBENCH IS EMPTY."); return; }
     var dm = dims(), s = Math.min(2, 3000 / Math.max(dm[0], dm[1]));
     toast("PRESSING THE PLATE…");
     renderCanvas(s).then(function (cv) {
@@ -811,7 +836,7 @@
   $("#btnMine2").onclick = openMine;
   $("#btnNew").onclick = function () {
     var go = function () { T = newTable(); SEL = null; hist = []; fut = []; autosave(); syncSelects(); layoutTable(); renderTable(); toast("A CLEAN SHEET."); };
-    if (T.items.length) ask("clear the bench? your pressed sheets stay safe in the press.", "CLEAR THE BENCH").then(function (y) { if (y) go(); }); else go();
+    if (T.items.length) ask("clear the workbench? your pressed sheets stay safe in the press.", "CLEAR THE WORKBENCH").then(function (y) { if (y) go(); }); else go();
   };
   $("#tBack").onclick = function () { showView("archive"); };
 

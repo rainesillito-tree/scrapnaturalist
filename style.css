@@ -233,11 +233,6 @@ body[data-view="archive"] .drawer, body[data-view="cut"] .drawer { display: bloc
   .cpanel { width: 300px; grid-template-columns: 1fr; border-top: none; border-left: 1px solid var(--line); padding: 14px; align-content: start; gap: 12px; }
   .shapes { flex-wrap: wrap; overflow: visible; }
   .sliders { grid-template-columns: 1fr; gap: 10px; }
-  .tbody { flex-direction: row; }
-  .tray { width: 168px; border-top: none; border-left: 1px solid var(--line); order: 2; overflow-y: auto; }
-  .tray-list { flex-wrap: wrap; height: auto; align-content: flex-start; overflow: visible; gap: 18px 14px; padding: 10px 4px 16px; }
-  .tray .scrap { height: 74px; }
-  .desk { order: 1; }
 }
 @media (max-width: 699px) {
   .nav { display: none; }

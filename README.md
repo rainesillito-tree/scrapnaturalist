@@ -11,7 +11,7 @@ No accounts. No server. It runs in a browser, keeps your tin and your sheets on 
 1. **Go out.** Wander the folios: terrain, ruins & thresholds, the human animal, the herbarium, night watch, curios, marginalia, plates. Nothing here is for sale. All of it is for cutting.
 2. **Take a snip.** Pick a scissor shape, lay it over whatever caught your eye, and cut. Or *collect whole*: the loose specimens are already cut free.
 3. **Fill the tin.** Every find rides in the specimen tin along the bottom, and it remembers you between visits.
-4. **Go to the bench.** Lay your finds on a sheet of paper, or on a photograph if you want a ground to stand on (*ground photo*, or *use as the ground* on any folio).
+4. **Go to the workbench.** Lay your finds on a sheet of paper, or on a photograph if you want a ground to stand on (*ground photo*, or *use as the ground* on any folio).
 5. **Arrange, turn, paste down.** Drag, turn, widen, flip. Lift a piece back up if you change your mind. Undo is always allowed.
 6. **Press a plate.** *Press & keep* saves the sheet on your device; *make a plate* gives you a PNG to carry home.
 
@@ -64,7 +64,7 @@ Add `--crop x0,y0,x1,y1` (fractions or pixels) to lift one object out of a busy 
 
 - Archive: ← → turn folios, swipe on a phone, Enter to snip.
 - Snip: drag to move the outline; wheel or two fingers to widen and turn.
-- Bench: drag to move, corner handles to widen and turn, Delete to discard, Ctrl/⌘-Z undo, Shift-Ctrl/⌘-Z redo.
+- Workbench: drag to move, corner handles to widen and turn, Delete to discard, Ctrl/⌘-Z undo, Shift-Ctrl/⌘-Z redo.
 
 ## Credits
 
