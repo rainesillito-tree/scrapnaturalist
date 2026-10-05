@@ -889,6 +889,14 @@
     { id:"boys-fishing-cut", category:"cutouts", group:"figures", title:"Boys at the Water's Edge", image:"images/cutouts/boys-fishing-cut.webp", w:459, h:430, alpha:true, tags:["boys", "fishing", "kneeling"] },
     { id:"shelf-phone-cut", category:"cutouts", group:"things", title:"Marble Shelf With Telephone", image:"images/cutouts/shelf-phone-cut.webp", w:1061, h:836, alpha:true, tags:["shelf", "marble", "telephone", "iron"] },
     { id:"daisies-cut", category:"cutouts", group:"things", title:"Daisies", image:"images/cutouts/daisies-cut.webp", w:358, h:336, alpha:true, tags:["daisies", "flowers", "grass"] },
+    { id:"hand-eucalyptus-cut", category:"cutouts", group:"figures", title:"A Hand Holding Eucalyptus", image:"images/cutouts/hand-eucalyptus-cut.webp", w:705, h:1200, alpha:true, tags:["hand", "eucalyptus", "leaves", "arm", "branch"] },
+    { id:"moon-neon-cut", category:"cutouts", group:"things", title:"Neon Moon With a Sideways Look", image:"images/cutouts/moon-neon-cut.webp", w:445, h:601, alpha:true, tags:["moon", "neon", "crescent", "face", "sign"] },
+    { id:"moon-mural-cut", category:"cutouts", group:"things", title:"The Moon With a Rocket in Its Eye", image:"images/cutouts/moon-mural-cut.webp", w:1200, h:1131, alpha:true, tags:["moon", "face", "mural", "rocket", "telescope"] },
+    { id:"car-red-cut", category:"cutouts", group:"things", title:"Red Car With Its Bonnet Up", image:"images/cutouts/car-red-cut.webp", w:1194, h:1195, alpha:true, tags:["car", "automobile", "red", "engine", "chrome"] },
+    { id:"card-lovers-cut", category:"cutouts", group:"things", title:"The Lovers (Tarot)", image:"images/cutouts/card-lovers-cut.webp", w:557, h:925, alpha:true, tags:["tarot", "card", "lovers", "angel", "esoteric"] },
+    { id:"card-wheel-cut", category:"cutouts", group:"things", title:"Wheel of Fortune (Tarot)", image:"images/cutouts/card-wheel-cut.webp", w:538, h:931, alpha:true, tags:["tarot", "card", "wheel", "fortune", "esoteric"] },
+    { id:"card-strength-cut", category:"cutouts", group:"things", title:"Strength (Tarot)", image:"images/cutouts/card-strength-cut.webp", w:640, h:922, alpha:true, tags:["tarot", "card", "lion", "strength", "esoteric"] },
+    { id:"card-sun-cut", category:"cutouts", group:"things", title:"The Sun (Tarot)", image:"images/cutouts/card-sun-cut.webp", w:498, h:657, alpha:true, tags:["tarot", "card", "sun", "esoteric"] },
 
     { id:"plate-sheet", category:"ephemera", title:"Sheet of Thirty-Two Plates", image:"images/plate-sheet.jpg", w:1536, h:1024, tags:["contact sheet", "plates", "mixed"] },
   ];
