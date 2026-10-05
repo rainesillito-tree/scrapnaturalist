@@ -72,3 +72,6 @@ See `CREDITS.md`. Photochrom and cabinet-card scans are from the Library of Cong
 
 ## The drawn ornaments
 The esoteric symbols and botanicals in LOOSE SPECIMENS (eyes, moons, keys, ferns, roses and so on) were drawn from scratch by `tools/draw_ornaments.py` and are released to the public domain (CC0). Edit the script and run it to draw your own.
+
+## Your own pieces
+"Your own pieces" lets a visitor add up to two pictures of their own and lift the background off them (in the browser, using a small U²-Net model; see CREDITS.md). They are kept in that browser's localStorage only (`cl.mine`) and are never uploaded.

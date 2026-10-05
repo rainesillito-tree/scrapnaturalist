@@ -31,7 +31,8 @@
     { id: "objects",      label: "CURIOS",          subs: "clocks · keys · chairs · books · vessels · eyes · mirrors · tools" },
     { id: "ephemera",     label: "MARGINALIA", subs: "notes · diagrams · stamps · maps · labels · numbers · type · newsprint" },
     { id: "print",        label: "PLATES & ENGRAVINGS", subs: "cyanotype · sepia · red & black · photocopy · engraving · woodcut" },
-    { id: "found",       label: "PICKED UP ALONG THE WAY", subs: "borrowed from the wider field" }
+    { id: "found",       label: "PICKED UP ALONG THE WAY", subs: "borrowed from the wider field" },
+    { id: "yours",       label: "YOURS · THIS VISIT", subs: "your own pieces, kept only in this browser" }
   ];
 
   var CONSTRAINTS = [

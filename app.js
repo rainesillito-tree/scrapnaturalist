@@ -10,6 +10,8 @@
   var ARCH = window.ARCHIVE || [], CATS = window.CATEGORIES || [], CONSTRAINTS = window.CONSTRAINTS || [];
   var FOUND = []; try { FOUND = JSON.parse(localStorage.getItem("cl.found") || "[]") || []; } catch (e) { FOUND = []; }
   FOUND.forEach(function (f) { ARCH.push(f); });
+  var MINE = []; try { MINE = JSON.parse(localStorage.getItem("cl.mine") || "[]") || []; } catch (e) { MINE = []; }
+  MINE.forEach(function (f) { ARCH.push(f); });
   var byId = {}; ARCH.forEach(function (a) { byId[a.id] = a; });
   var catLabel = {}; CATS.forEach(function (c) { catLabel[c.id] = c.label; });
 
@@ -830,6 +832,170 @@
     if (T.items.length) ask("clear the workbench? your pressed sheets stay safe in the press.", "CLEAR THE WORKBENCH").then(function (y) { if (y) go(); }); else go();
   };
   $("#tBack").onclick = function () { showView("archive"); };
+
+  /* ---------- your own pieces: up to two pictures, lifted off their backgrounds, kept only in this browser ---------- */
+  var MAXMINE = 2;
+  function saveMine() { if (!LS.set("cl.mine", MINE)) toast("NO ROOM LEFT IN THIS BROWSER. TRY A SMALLER PICTURE."); }
+  var ortP = null, sessP = null;
+  function loadOrt() {
+    if (ortP) return ortP;
+    return ortP = new Promise(function (res, rej) {
+      if (window.ort) return res(window.ort);
+      var s = document.createElement("script"); s.src = "vendor/ort.min.js";
+      s.onload = function () { res(window.ort); }; s.onerror = function () { ortP = null; rej(new Error("the lifting tool would not load")); };
+      document.head.appendChild(s);
+    });
+  }
+  function getSession() {
+    if (sessP) return sessP;
+    return sessP = loadOrt().then(function (ort) {
+      ort.env.wasm.wasmPaths = "vendor/"; ort.env.wasm.numThreads = 1;
+      return fetch("models/u2netp.onnx").then(function (r) { if (!r.ok) throw new Error("the model would not download"); return r.arrayBuffer(); })
+        .then(function (buf) { return ort.InferenceSession.create(buf, { executionProviders: ["wasm"] }); });
+    }).catch(function (e) { sessP = null; throw e; });
+  }
+  // returns a Uint8 alpha mask the size of the canvas
+  function liftMask(cv) {
+    return getSession().then(function (sess) {
+      var ort = window.ort, S = 320, t = document.createElement("canvas"); t.width = t.height = S;
+      var tx = t.getContext("2d"); tx.drawImage(cv, 0, 0, S, S);
+      var d = tx.getImageData(0, 0, S, S).data, n = S * S, f = new Float32Array(3 * n), mean = [0.485, 0.456, 0.406], sd = [0.229, 0.224, 0.225];
+      for (var i = 0; i < n; i++) for (var c = 0; c < 3; c++) f[c * n + i] = (d[i * 4 + c] / 255 - mean[c]) / sd[c];
+      var feeds = {}; feeds[sess.inputNames[0]] = new ort.Tensor("float32", f, [1, 3, S, S]);
+      return sess.run(feeds).then(function (out) {
+        var o = out[sess.outputNames[0]].data, mn = Infinity, mx = -Infinity, k;
+        for (k = 0; k < n; k++) { if (o[k] < mn) mn = o[k]; if (o[k] > mx) mx = o[k]; }
+        var m = document.createElement("canvas"); m.width = m.height = S; var mc = m.getContext("2d"), id = mc.createImageData(S, S);
+        for (k = 0; k < n; k++) { var v = Math.round(255 * (o[k] - mn) / ((mx - mn) || 1)); id.data[k * 4] = id.data[k * 4 + 1] = id.data[k * 4 + 2] = 255; id.data[k * 4 + 3] = v; }
+        mc.putImageData(id, 0, 0);
+        var big = document.createElement("canvas"); big.width = cv.width; big.height = cv.height; var bc = big.getContext("2d");
+        bc.imageSmoothingEnabled = true; bc.imageSmoothingQuality = "high"; bc.drawImage(m, 0, 0, cv.width, cv.height);
+        var bd = bc.getImageData(0, 0, cv.width, cv.height).data, a = new Uint8Array(cv.width * cv.height);
+        for (k = 0; k < a.length; k++) a[k] = bd[k * 4 + 3];
+        return a;
+      });
+    });
+  }
+  function exportPiece(cv, hasAlpha) {
+    var ctx = cv.getContext("2d"), W = cv.width, H = cv.height, x0 = W, y0 = H, x1 = 0, y1 = 0;
+    if (hasAlpha) {
+      var d = ctx.getImageData(0, 0, W, H).data;
+      for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      if (x1 <= x0 || y1 <= y0) return null;
+    } else { x0 = 0; y0 = 0; x1 = W - 1; y1 = H - 1; }
+    var cw = x1 - x0 + 1, ch = y1 - y0 + 1, k = Math.min(1, 1400 / Math.max(cw, ch)), url = "";
+    for (var tries = 0; tries < 6; tries++) {
+      var o = document.createElement("canvas"); o.width = Math.max(1, Math.round(cw * k)); o.height = Math.max(1, Math.round(ch * k));
+      o.getContext("2d").drawImage(cv, x0, y0, cw, ch, 0, 0, o.width, o.height);
+      url = hasAlpha ? o.toDataURL("image/webp", 0.88) : o.toDataURL("image/jpeg", 0.86);
+      if (hasAlpha && url.indexOf("data:image/webp") !== 0) url = o.toDataURL("image/png");
+      if (url.length < 1200000) return { url: url, w: o.width, h: o.height };
+      k *= 0.8;
+    }
+    return { url: url, w: o.width, h: o.height };
+  }
+  function addMine(m) {
+    var it = { id: rid("mine-"), category: "yours", title: m.title || "Your piece", image: m.url, w: m.w, h: m.h, tags: ["yours", "this visit"] };
+    if (m.alpha) it.alpha = true;
+    MINE.push(it); ARCH.push(it); byId[it.id] = it; if (!it.alpha) PAGES.push(it);
+    saveMine(); renderCats(); return it;
+  }
+  function removeMine(id) {
+    MINE = MINE.filter(function (a) { return a.id !== id; }); ARCH = ARCH.filter(function (a) { return a.id !== id; }); delete byId[id]; PAGES = PAGES.filter(function (a) { return a.id !== id; });
+    scraps = scraps.filter(function (s) { return s.srcId !== id; }); saveScraps();
+    var gone = {}; Object.keys(T.scraps).forEach(function (k) { if (T.scraps[k].srcId === id) gone[k] = 1; });
+    if (Object.keys(gone).length) act(function () { T.items = T.items.filter(function (i) { return !gone[i.scrapId]; }); Object.keys(gone).forEach(function (k) { delete T.scraps[k]; }); SEL = null; });
+    saveMine(); renderDrawer();
+    if (A.cat === "yours" || A.cat === "all") setCat(A.cat === "yours" && !ARCH.some(function (a) { return a.category === "yours"; }) ? "all" : A.cat, 0); else renderCats();
+  }
+  function openOwn() {
+    var h = '<h2>YOUR OWN PIECES</h2><p class="sub">bring up to two pictures of your own. lift the background off them and they become cut-outs for this session. they stay in this browser only: nothing is sent anywhere, and no one else will ever see them.</p>';
+    h += '<div class="own-list">' + (MINE.length ? MINE.map(function (a) { return '<div class="own-item"><img alt="" src="' + esc(a.image) + '"><span>' + esc(a.title) + (a.alpha ? "" : " (with its background)") + '</span><button class="btn small" data-rm="' + esc(a.id) + '">REMOVE</button></div>'; }).join("") : '<p class="own-empty">nothing of yours yet.</p>') + "</div>";
+    h += '<p class="sub">' + MINE.length + " of " + MAXMINE + " places used.</p>";
+    if (MINE.length < MAXMINE) h += '<div class="row"><label class="btn primary file">ADD A PICTURE…<input type="file" id="ownFile" accept="image/*" hidden></label><button class="btn" id="ownFolio">USE THE FOLIO I\'M LOOKING AT</button></div>';
+    else h += '<p class="sub">both places are in use. remove one to make room.</p>';
+    h += '<div class="row"><button class="btn" id="ownDone">DONE</button></div>';
+    openModal(h);
+    $("#ownDone").onclick = closeModal;
+    $$("[data-rm]").forEach(function (b) {
+      b.onclick = function () {
+        var id = b.dataset.rm, used = scraps.some(function (s) { return s.srcId === id; });
+        if (!used) { removeMine(id); openOwn(); return; }
+        ask("remove this piece? any scraps cut from it come out of the tin and off the workbench too.", "REMOVE IT").then(function (y) { if (y) removeMine(id); openOwn(); });
+      };
+    });
+    if ($("#ownFile")) $("#ownFile").onchange = function () {
+      var f = this.files && this.files[0]; if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function () { var im = new Image(); im.onload = function () { openWorkshop(im, (f.name || "Your piece").replace(/\.[^.]+$/, "").slice(0, 40)); }; im.onerror = function () { toast("THAT FILE WON'T OPEN."); }; im.src = fr.result; };
+      fr.readAsDataURL(f);
+    };
+    if ($("#ownFolio")) $("#ownFolio").onclick = function () {
+      var it = A.list[A.idx]; if (!it) return;
+      toast("FETCHING THE FOLIO…");
+      loadImg(it.image).then(function (im) { openWorkshop(im, it.title.slice(0, 40)); }, function () { toast("THAT FOLIO WON'T COME LOOSE. TRY ONE OF YOUR OWN."); });
+    };
+  }
+  function openWorkshop(img, name) {
+    var k = Math.min(1, 1200 / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height)), W = Math.round((img.naturalWidth || img.width) * k), H = Math.round((img.naturalHeight || img.height) * k);
+    var cv = document.createElement("canvas"); cv.width = W; cv.height = H; var ctx = cv.getContext("2d"); ctx.drawImage(img, 0, 0, W, H);
+    try { ctx.getImageData(0, 0, 1, 1); } catch (e) { toast("THAT PICTURE CAN'T BE EDITED (IT BELONGS TO ANOTHER SITE)."); return; }
+    var original = ctx.getImageData(0, 0, W, H), undo = [], hasAlpha = false;
+    var h = '<h2>THE BACKGROUND LIFTER</h2><p class="sub" id="lfHint">lift the background in one go, or tap a colour to rub it out. the chequerboard shows what is gone.</p>' +
+      '<div class="lf-stage" id="lfStage"></div>' +
+      '<div class="row lf-row"><button class="btn primary" id="lfAuto">LIFT THE BACKGROUND</button><button class="btn" id="lfUndo" disabled>UNDO</button><button class="btn" id="lfReset">START OVER</button></div>' +
+      '<div class="row lf-row"><label class="bg-fade">TAP A COLOUR TO ERASE · REACH <input type="range" id="lfTol" min="5" max="90" value="32"></label></div>' +
+      '<div class="row lf-row"><input id="lfName" class="lf-name" maxlength="40" placeholder="name it (optional)" value="' + esc(name || "") + '"><button class="btn primary" id="lfSave">ADD TO MY PIECES</button><button class="btn" id="lfBack">BACK</button></div>' +
+      '<p class="sub lf-note">the first lift downloads a small model (about 5 MB, then your browser remembers it). the picture itself never leaves this device.</p>';
+    openModal(h);
+    var stage = $("#lfStage"); cv.className = "lf-canvas"; stage.appendChild(cv);
+    function push() { undo.push(ctx.getImageData(0, 0, W, H)); if (undo.length > 8) undo.shift(); $("#lfUndo").disabled = false; }
+    $("#lfUndo").onclick = function () { if (!undo.length) return; ctx.putImageData(undo.pop(), 0, 0); this.disabled = !undo.length; };
+    $("#lfReset").onclick = function () { push(); ctx.putImageData(original, 0, 0); hasAlpha = false; };
+    $("#lfAuto").onclick = function () {
+      var btn = this, hint = $("#lfHint"); btn.disabled = true; btn.textContent = "LIFTING… (a moment)";
+      liftMask(cv).then(function (a) {
+        push(); var im = ctx.getImageData(0, 0, W, H), d = im.data;
+        for (var i = 0; i < a.length; i++) d[i * 4 + 3] = Math.round(d[i * 4 + 3] * a[i] / 255);
+        ctx.putImageData(im, 0, 0); hasAlpha = true; hint.textContent = "lifted. tap any leftover colour to rub it out, or undo and try again.";
+      }).catch(function (e) { hint.textContent = "the lifter could not run here (" + (e && e.message || "unknown") + "). you can still tap colours to erase them."; })
+        .then(function () { btn.disabled = false; btn.textContent = "LIFT THE BACKGROUND"; });
+    };
+    cv.addEventListener("pointerdown", function (e) {
+      var r = cv.getBoundingClientRect(), x = Math.floor((e.clientX - r.left) / r.width * W), y = Math.floor((e.clientY - r.top) / r.height * H);
+      if (x < 0 || y < 0 || x >= W || y >= H) return;
+      var im = ctx.getImageData(0, 0, W, H), d = im.data, p0 = (y * W + x) * 4;
+      if (d[p0 + 3] < 10) return;
+      push();
+      var sr = d[p0], sg = d[p0 + 1], sb = d[p0 + 2], tol = +$("#lfTol").value, t2 = tol * tol * 3, seen = new Uint8Array(W * H), st = [y * W + x];
+      seen[y * W + x] = 1;
+      while (st.length) {
+        var q = st.pop(), qx = q % W, qy = (q - qx) / W, o = q * 4;
+        var dr = d[o] - sr, dg = d[o + 1] - sg, db = d[o + 2] - sb;
+        if (d[o + 3] === 0 || dr * dr + dg * dg + db * db > t2) continue;
+        d[o + 3] = 0;
+        if (qx > 0 && !seen[q - 1]) { seen[q - 1] = 1; st.push(q - 1); }
+        if (qx < W - 1 && !seen[q + 1]) { seen[q + 1] = 1; st.push(q + 1); }
+        if (qy > 0 && !seen[q - W]) { seen[q - W] = 1; st.push(q - W); }
+        if (qy < H - 1 && !seen[q + W]) { seen[q + W] = 1; st.push(q + W); }
+      }
+      ctx.putImageData(im, 0, 0); hasAlpha = true;
+    });
+    $("#lfBack").onclick = openOwn;
+    $("#lfSave").onclick = function () {
+      if (MINE.length >= MAXMINE) { toast("BOTH PLACES ARE IN USE."); return; }
+      if (!hasAlpha) {
+        // check if erased any pixel at all; if not, keep as a whole picture
+        var dd = ctx.getImageData(0, 0, W, H).data; for (var i = 3; i < dd.length; i += 4) if (dd[i] < 250) { hasAlpha = true; break; }
+      }
+      var ex = exportPiece(cv, hasAlpha); if (!ex) { toast("NOTHING LEFT OF IT. UNDO A STEP."); return; }
+      var nm = ($("#lfName").value || "").trim() || "Your piece";
+      var it = addMine({ title: nm, url: ex.url, w: ex.w, h: ex.h, alpha: hasAlpha });
+      toast(hasAlpha ? "KEPT. FIND IT UNDER YOURS." : "KEPT, WITH ITS BACKGROUND.");
+      closeModal(); setCat("yours", ARCH.filter(function (a) { return a.category === "yours"; }).indexOf(it));
+    };
+  }
+  $("#btnOwn").onclick = openOwn;
 
   /* ---------- boot ---------- */
   function relayout() { if (view === "archive") fitBox($("#pageBox"), $("#aStage"), A.ar, 12); else if (view === "cut") layoutCut(); else if (view === "table") layoutTable(); }

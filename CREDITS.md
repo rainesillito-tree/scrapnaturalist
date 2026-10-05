@@ -9,3 +9,8 @@ The neon moon, moon mural, eucalyptus hand, red car and four tarot cards were cu
 
 ## Drawn ornaments
 The `orn-*` specimens were drawn in code for this project and dedicated to the public domain (CC0).
+
+## Background lifter (your own pieces)
+Runs entirely in the visitor's browser; nothing is uploaded.
+- **onnxruntime-web 1.17.3** (`vendor/`): MIT licence, Microsoft.
+- **U²-Net (u2netp)** model (`models/u2netp.onnx`): Apache 2.0, Xuebin Qin et al., via the rembg project.

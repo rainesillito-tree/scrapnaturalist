@@ -302,3 +302,15 @@ body[data-view="archive"] .drawer, body[data-view="cut"] .drawer { display: bloc
 .wf-grid img { background: #cfc4a8; }
 .wf-eso { margin: 6px 0 4px; font-size: 13px; letter-spacing: .08em; }
 .wf-chips .chip.eso { border-style: solid; }
+
+/* your own pieces + background lifter */
+.own-list { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+.own-item { display: flex; align-items: center; gap: 10px; padding: 6px; border: 1px solid var(--ink); background: var(--paper); }
+.own-item img { width: 56px; height: 56px; object-fit: contain; background: #cfc4a8; flex: none; }
+.own-item span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.own-empty { font-style: italic; margin: 4px 0; }
+.lf-stage { display: flex; justify-content: center; padding: 8px; border: 1px solid var(--ink); margin-bottom: 10px; background: #fff; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+.lf-canvas { max-width: 100%; max-height: 46vh; width: auto; height: auto; cursor: crosshair; touch-action: manipulation; }
+.lf-row { margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+.lf-name { flex: 1 1 160px; min-width: 0; min-height: 40px; padding: 8px 10px; background: var(--paper); color: var(--ink); border: 1px solid var(--ink); font: inherit; font-size: 17px; }
+.lf-note { font-size: 13px; }
