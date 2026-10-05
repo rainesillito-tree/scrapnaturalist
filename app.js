@@ -108,7 +108,21 @@
   /* ---------- the wider field: open collections searched from the page ---------- */
   function jget(url) { return fetch(url, { mode: "cors" }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); }); }
   function strip(h) { var d = document.createElement("div"); d.innerHTML = h || ""; return (d.textContent || "").trim().slice(0, 90); }
+  function prox(u) { return "https://wsrv.nl/?url=" + encodeURIComponent(u) + "&w=1200&output=jpg"; }
   var SOURCES = {
+    wellcome: { label: "Wellcome Collection (esoteric, medical, occult)", search: function (q, page) {
+      var u = "https://api.wellcomecollection.org/catalogue/v2/images?query=" + encodeURIComponent(q) + "&locations.license=pdm,cc0&pageSize=40&page=" + (page + 1);
+      return jget(u).then(function (d) {
+        var out = [];
+        (d.results || []).forEach(function (x) {
+          var loc = (x.locations && x.locations[0]) || {}, src = (loc.url || "") + " " + ((x.thumbnail && x.thumbnail.url) || ""), m = /iiif\.wellcomecollection\.org\/image\/([^\/]+)\//.exec(src);
+          if (!m) return;
+          var base = "https://iiif.wellcomecollection.org/image/" + m[1], src2 = x.source || {};
+          out.push({ id: "wel-" + x.id, title: String(src2.title || "Untitled").slice(0, 80), thumb: base + "/full/260,/0/default.jpg", image: base + "/full/900,/0/default.jpg", w: 900, h: 1100, credit: "Wellcome Collection (" + ((loc.license && loc.license.label) || "public domain") + ")", link: "https://wellcomecollection.org/works/" + (src2.id || "") });
+        });
+        return out;
+      });
+    } },
     commons: { label: "Wikimedia Commons", search: function (q, page) {
       var u = "https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=40&gsroffset=" + (page * 40) + "&gsrsearch=" + encodeURIComponent(q + " filetype:bitmap") + "&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1200&iiextmetadatafilter=LicenseShortName|Artist";
       return jget(u).then(function (d) {
@@ -156,7 +170,14 @@
   };
   var WF = { src: "commons", q: "", page: 0, results: [], busy: false };
   var CHIPS = ["photochrom", "tintype", "cabinet card", "herbarium", "engraved bird", "teapot", "automobile 1920", "chair", "ship", "map", "moth", "cathedral"];
+  var CHIPS_ESO = ["eye", "anatomical eye", "alchemy", "astrology", "palmistry", "skull", "occult", "witchcraft", "demon", "sea monster", "ouroboros", "phrenology", "mushroom", "heart", "hand", "skeleton"];
   function addFound(r) {
+    var probe = new Image();
+    probe.onload = function () { saveFound(r); };
+    probe.onerror = function () { r.image = prox(r.image); r.thumb = prox(r.thumb); saveFound(r); };
+    probe.src = r.image;
+  }
+  function saveFound(r) {
     var it = byId[r.id];
     if (!it) {
       it = { id: r.id, category: "found", title: r.title, image: r.image, w: r.w, h: r.h, tags: [], credit: r.credit, link: r.link, web: true };
@@ -172,6 +193,7 @@
       '<div class="wf-bar"><select id="wfSrc" class="sel" aria-label="Collection">' + Object.keys(SOURCES).map(function (k) { return '<option value="' + k + '"' + (k === WF.src ? " selected" : "") + ">" + SOURCES[k].label + "</option>"; }).join("") + '</select>' +
       '<input id="wfQ" type="search" placeholder="what are you hunting for?" value="' + esc(WF.q) + '"><button class="btn primary" id="wfGo">LOOK</button></div>' +
       '<div class="wf-chips">' + CHIPS.map(function (c) { return '<button class="chip" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
+      '<p class="sub wf-eso">ESOTERICA · eyes, hands, hearts, alchemy and other odd old things (Wellcome Collection)</p><div class="wf-chips">' + CHIPS_ESO.map(function (c) { return '<button class="chip eso" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
       '<p class="wf-msg" id="wfMsg">' + (WF.results.length ? "" : "try a word. any word. see what turns up.") + '</p><div class="bg-grid wf-grid" id="wfGrid"></div><div class="row"><button class="btn" id="wfMore" hidden>MORE</button></div>';
     openModal(h); drawResults();
     function go(more) {
@@ -182,18 +204,19 @@
         WF.results = WF.results.concat(list); drawResults();
         $("#wfMsg").textContent = WF.results.length ? "" : "nothing turned up. try a stranger word, or another collection.";
         $("#wfMore").hidden = !list.length;
-      }).catch(function () {
-        $("#wfMsg").textContent = "this collection didn't answer. the wider field only opens when the page lives on its own site (like GitHub Pages) and the collection is awake. try another one.";
+      }).catch(function (e) {
+        $("#wfMsg").textContent = "this collection didn't answer (" + ((e && e.message) || "no reply") + "). try another one, or look again in a moment.";
       });
     }
     function drawResults() {
-      $("#wfGrid").innerHTML = WF.results.map(function (r, i) { return '<button data-i="' + i + '"><img loading="lazy" alt="" src="' + esc(r.thumb) + '"><span>' + esc(r.title) + "</span></button>"; }).join("");
+      $("#wfGrid").innerHTML = WF.results.map(function (r, i) { return '<button data-i="' + i + '"><img loading="lazy" alt="" src="' + esc(r.thumb) + '" data-p="' + esc(prox(r.thumb)) + '"><span>' + esc(r.title) + "</span></button>"; }).join("");
+      $$("#wfGrid img").forEach(function (im) { im.onerror = function () { im.onerror = function () { im.parentNode.style.display = "none"; }; im.src = im.dataset.p; }; });
       $$("#wfGrid [data-i]").forEach(function (b) { b.onclick = function () { addFound(WF.results[+b.dataset.i]); }; });
     }
     $("#wfGo").onclick = function () { go(false); };
     $("#wfMore").onclick = function () { go(true); };
     $("#wfQ").onkeydown = function (e) { if (e.key === "Enter") go(false); };
-    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; go(false); }; });
+    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; go(false); }; });
     if (WF.results.length) $("#wfMore").hidden = false;
   }
   $("#btnWide").onclick = openWider;
@@ -722,7 +745,7 @@
   var imgCache = {};
   function loadImg(url) {
     if (imgCache[url]) return imgCache[url];
-    return imgCache[url] = new Promise(function (res, rej) { var i = new Image(); if (/^https?:/i.test(url) && url.indexOf(location.origin) !== 0) i.crossOrigin = "anonymous"; i.onload = function () { res(i); }; i.onerror = function () { rej(new Error("image")); }; i.src = url; });
+    return imgCache[url] = new Promise(function (res, rej) { var i = new Image(); if (/^https?:/i.test(url) && url.indexOf(location.origin) !== 0) i.crossOrigin = "anonymous"; i.onload = function () { res(i); }; i.onerror = function () { if (i.crossOrigin && url.indexOf("wsrv.nl") < 0) { var j = new Image(); j.crossOrigin = "anonymous"; j.onload = function () { res(j); }; j.onerror = function () { rej(new Error("image")); }; j.src = prox(url); } else rej(new Error("image")); }; i.src = url; });
   }
   function renderCanvas(scale) {
     var dm = dims(), W = dm[0], H = dm[1], cv = document.createElement("canvas");
