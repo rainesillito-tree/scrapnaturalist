@@ -745,9 +745,16 @@
   var imgCache = {};
   function loadImg(url) {
     if (imgCache[url]) return imgCache[url];
-    return imgCache[url] = new Promise(function (res, rej) { var i = new Image(); if (/^https?:/i.test(url) && url.indexOf(location.origin) !== 0) i.crossOrigin = "anonymous"; i.onload = function () { res(i); }; i.onerror = function () { if (i.crossOrigin && url.indexOf("wsrv.nl") < 0) { var j = new Image(); j.crossOrigin = "anonymous"; j.onload = function () { res(j); }; j.onerror = function () { rej(new Error("image")); }; j.src = prox(url); } else rej(new Error("image")); }; i.src = url; });
+    var remote = /^https?:/i.test(url) && url.indexOf(location.origin) !== 0;
+    function tryOne(u, cors) { return new Promise(function (res, rej) { var i = new Image(); if (cors) i.crossOrigin = "anonymous"; i.onload = function () { res(i); }; i.onerror = function () { rej(new Error("image")); }; i.src = u; }); }
+    var p = !remote ? tryOne(url, false) : tryOne(url, true)
+      .catch(function () { return tryOne(prox(url), true); })
+      .catch(function () { return tryOne("https://images.weserv.nl/?url=" + encodeURIComponent(url) + "&w=1200&output=jpg", true); });
+    return imgCache[url] = p;
   }
+  var MISSED = 0;
   function renderCanvas(scale) {
+    MISSED = 0;
     var dm = dims(), W = dm[0], H = dm[1], cv = document.createElement("canvas");
     cv.width = Math.round(W * scale); cv.height = Math.round(H * scale);
     var ctx = cv.getContext("2d");
@@ -760,7 +767,8 @@
       }) : Promise.resolve();
       T.items.forEach(function (it) {
         var sc = T.scraps[it.scrapId]; if (!sc) return;
-        chain = chain.then(function () { return loadImg(imgOf(sc)); }).then(function (img) {
+        chain = chain.then(function () { return loadImg(imgOf(sc)).catch(function () { MISSED++; return null; }); }).then(function (img) {
+          if (!img) return;
           var w = it.w, h = w / sc.ratio, m = sc.mask, k = w / sc.crop.w;
           var path = new Path2D(); path.addPath(new Path2D((SHAPES[sc.shape] || SHAPES.circle).d), new DOMMatrix().translate(m.cx, m.cy).rotate(m.rot).translate(-m.w / 2, -m.h / 2).scale(m.w, m.h));
           ctx.save(); ctx.scale(scale, scale); ctx.translate(it.x, it.y); ctx.rotate(it.rot * Math.PI / 180); ctx.scale(it.fx, it.fy); ctx.translate(-w / 2, -h / 2); ctx.scale(k, k); ctx.translate(-sc.crop.x, -sc.crop.y);
@@ -779,7 +787,7 @@
     toast("PRESSING THE PLATE…");
     renderCanvas(s).then(function (cv) {
       var url; try { url = cv.toDataURL("image/png"); } catch (e) { toast("THE IMAGES WON'T EXPORT FROM HERE. SERVE THE FOLDER (SEE README)."); return; }
-      openModal('<h2>A PLATE FROM THE FIELD</h2><p class="sub">only the sheet and what is pasted to it. press and hold the image, or right-click it, to keep it.</p><img class="export-img" alt="Exported collage" src="' + url + '"><div class="row"><a class="btn primary" id="dlLink" download="collage-' + Date.now() + '.png" href="' + url + '" style="text-decoration:none;display:inline-flex;align-items:center">KEEP THE PLATE (PNG)</a></div>');
+      openModal('<h2>A PLATE FROM THE FIELD</h2><p class="sub">only the sheet and what is pasted to it. press and hold the image, or right-click it, to keep it.' + (MISSED ? " " + MISSED + " found picture" + (MISSED > 1 ? "s" : "") + " would not travel from its collection, so " + (MISSED > 1 ? "they were" : "it was") + " left off." : "") + '</p><img class="export-img" alt="Exported collage" src="' + url + '"><div class="row"><a class="btn primary" id="dlLink" download="collage-' + Date.now() + '.png" href="' + url + '" style="text-decoration:none;display:inline-flex;align-items:center">KEEP THE PLATE (PNG)</a></div>');
     }).catch(function () { toast("COULD NOT EXPORT. AN IMAGE FAILED TO LOAD."); });
   };
   $("#btnSave").onclick = function () {
