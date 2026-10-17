@@ -20,3 +20,6 @@ Cut from sticker and specimen sheets supplied by the studio owner (statue/halfto
 
 ## Overlays (35 pieces)
 Painted procedurally from noise by `tools/make_overlays.py` (numpy/OpenCV). No source images, so nothing to license.
+
+## The Chorus and Hellebore (30 pieces)
+Figures cut from the studio owner's own character sheets and photographs (The Chorus, Hellebore the Guild Master). Not public-domain finds; they are the owner's own work.
