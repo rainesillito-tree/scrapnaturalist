@@ -23,3 +23,6 @@ Painted procedurally from noise by `tools/make_overlays.py` (numpy/OpenCV). No s
 
 ## The Chorus and Hellebore (30 pieces)
 Figures cut from the studio owner's own character sheets and photographs (The Chorus, Hellebore the Guild Master). Not public-domain finds; they are the owner's own work.
+
+## More figures (62 pieces)
+Walkers, Ailanthus, Hellebore card details, door scenes and moths, cut from the studio owner's own images (AI-assisted artwork by the owner). Not public-domain finds.
