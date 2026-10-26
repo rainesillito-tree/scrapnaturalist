@@ -29,3 +29,9 @@ Walkers, Ailanthus, Hellebore card details, door scenes and moths, cut from the 
 
 ## Road & Light (14 scenes)
 Whole images supplied by the studio owner (her own AI-assisted artwork). Filed under People, Terrain, Architecture. Not public-domain finds.
+
+## Drawings by the Luminarium (5)
+Original ink drawings by Rai Sillito / The Luminarium (skeleton series), backgrounds removed. © the artist; shown in their own category so they are clearly hers.
+
+## More washi tape (14) and pencil starbursts (15)
+Painted procedurally by `tools/make_overlays.py` and the starburst generator (no source images).
