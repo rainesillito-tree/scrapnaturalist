@@ -26,3 +26,6 @@ Figures cut from the studio owner's own character sheets and photographs (The Ch
 
 ## More figures (62 pieces)
 Walkers, Ailanthus, Hellebore card details, door scenes and moths, cut from the studio owner's own images (AI-assisted artwork by the owner). Not public-domain finds.
+
+## Road & Light (14 scenes)
+Whole images supplied by the studio owner (her own AI-assisted artwork). Filed under People, Terrain, Architecture. Not public-domain finds.

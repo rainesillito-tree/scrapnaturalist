@@ -860,6 +860,22 @@
     { id:"steamer-whale", category:"landscapes", title:"Steamer With a Whale", image:"images/steamer-whale.jpg", w:640, h:463, tags:["ship", "whale", "fjord", "photochrom"] },
     { id:"riga-harbour", category:"architecture", title:"Harbour With Spires", image:"images/riga-harbour.jpg", w:984, h:724, tags:["harbour", "ships", "spire", "photochrom"] },
 
+    // ---- ROAD & LIGHT: owner-supplied scenes
+    { id:"wedge-road", category:"people", title:"Walker Beneath A Wedge Of Light", image:"images/wedge-road.jpg", w:928, h:1232, tags:["walker", "road", "forest", "light", "wedge", "back"] },
+    { id:"crimson-sun-road", category:"people", title:"Woman On A Bending Road, Crimson Sky", image:"images/crimson-sun-road.jpg", w:928, h:1232, tags:["woman", "road", "field", "sun", "rays", "magenta"] },
+    { id:"wind-hair", category:"people", title:"Hair In The Wind, Road", image:"images/wind-hair.jpg", w:928, h:1232, tags:["woman", "hair", "wind", "road", "mountain", "film", "grain"] },
+    { id:"dark-dress-wood", category:"people", title:"Dark Dress In A Glittering Wood", image:"images/dark-dress-wood.jpg", w:928, h:1232, tags:["woman", "silhouette", "dress", "forest", "sparkle"] },
+    { id:"plaid-green-sky", category:"people", title:"Plaid Walker, Green Night Sky", image:"images/plaid-green-sky.jpg", w:928, h:1232, tags:["walker", "road", "plaid", "stars", "green", "sky"] },
+    { id:"light-road", category:"landscapes", title:"Road Bending Into A Beam", image:"images/light-road.jpg", w:928, h:1232, tags:["road", "beam", "light", "green", "bend"] },
+    { id:"mirror-oval", category:"people", title:"Woman In An Oval Mirror, Oak Avenue", image:"images/mirror-oval.jpg", w:928, h:1232, tags:["woman", "mirror", "oak", "avenue", "sparkle"] },
+    { id:"orange-dress-road", category:"people", title:"Girl In An Orange Dress, Forest Road", image:"images/orange-dress-road.jpg", w:928, h:1232, tags:["girl", "dress", "road", "forest", "wires"] },
+    { id:"galaxy-skirt", category:"people", title:"Skirt Of Galaxy, Canyon Road", image:"images/galaxy-skirt.jpg", w:928, h:1232, tags:["woman", "skirt", "galaxy", "canyon", "road"] },
+    { id:"sunburst-trees", category:"landscapes", title:"Three Trees, Sunburst", image:"images/sunburst-trees.jpg", w:928, h:1232, tags:["trees", "sun", "rays", "zoom", "blur"] },
+    { id:"house-bw", category:"architecture", title:"House Under A Leaning Tree, Black And White", image:"images/house-bw.jpg", w:928, h:1232, tags:["house", "tree", "victorian", "black", "white"] },
+    { id:"coast-ribbons", category:"landscapes", title:"Coast With Ribbons Of Amber", image:"images/coast-ribbons.jpg", w:928, h:1232, tags:["coast", "rocks", "sea", "ribbons", "amber", "sunset"] },
+    { id:"house-lightning", category:"architecture", title:"House Struck By A Thread Of Light", image:"images/house-lightning.jpg", w:928, h:1232, tags:["house", "victorian", "lightning", "teal"] },
+    { id:"prism-rocks", category:"landscapes", title:"Glass Pyramid On The Rocks", image:"images/prism-rocks.jpg", w:928, h:1232, tags:["pyramid", "prism", "rocks", "hillside", "sun", "star"] },
+
     // ---- CUT-OUTS: transparent WebP, isolated with tools/cutout.py. group = figures | things | ink
     { id:"angel-palm-cut", category:"cutouts", group:"figures", title:"Angel With Palm", image:"images/cutouts/angel-palm-cut.webp", w:417, h:701, alpha:true, tags:["statue", "wings", "stone"] },
     { id:"bride-cut", category:"cutouts", group:"figures", title:"Bride, Mossed", image:"images/cutouts/bride-cut.webp", w:808, h:1200, alpha:true, tags:["bride", "face", "moss", "veil"] },
