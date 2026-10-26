@@ -593,7 +593,7 @@
 
   /* ---------- table: tools ---------- */
   var TOOLS = [
-    ["undo", "UNDO"], ["redo", "REDO"], ["|"], ["rotate", "ROTATE"], ["flipH", "FLIP ↔"], ["flipV", "FLIP ↕"], ["dup", "DUPLICATE"], ["|"],
+    ["undo", "UNDO"], ["redo", "REDO"], ["|"], ["rotate", "ROTATE"], ["flipH", "FLIP ↔"], ["flipV", "FLIP ↕"], ["dup", "DUPLICATE"], ["|"], ["lift", "LIFT BACKGROUND"], ["|"],
     ["fwd", "FORWARD"], ["back", "BACK"], ["front", "TO FRONT"], ["backmost", "TO BACK"], ["|"], ["glue", "PASTE DOWN"], ["del", "DISCARD"], ["|"], ["clear", "CLEAR WORKBENCH"]
   ];
   $("#tools").innerHTML = TOOLS.map(function (t) { return t[0] === "|" ? '<span class="gap"></span>' : '<button class="btn" data-a="' + t[0] + '">' + t[1] + "</button>"; }).join("");
@@ -617,6 +617,7 @@
     if (a === "undo") return undo(); if (a === "redo") return redo();
     if (a === "clear") { ask("clear the workbench? every specimen comes off.", "CLEAR WORKBENCH").then(function (y) { if (y) act(function () { T.items = []; SEL = null; }); }); return; }
     if (!it) return;
+    if (a === "lift") return liftOnBench(it);
     var i = T.items.indexOf(it);
     act(function () {
       if (a === "rotate") it.rot = Math.round(((it.rot + 15 + 180) % 360) - 180);
@@ -876,9 +877,9 @@
       });
     });
   }
-  function exportPiece(cv, hasAlpha) {
+  function exportPiece(cv, hasAlpha, keepBox, limit) {
     var ctx = cv.getContext("2d"), W = cv.width, H = cv.height, x0 = W, y0 = H, x1 = 0, y1 = 0;
-    if (hasAlpha) {
+    if (hasAlpha && !keepBox) {
       var d = ctx.getImageData(0, 0, W, H).data;
       for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 12) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
       if (x1 <= x0 || y1 <= y0) return null;
@@ -889,7 +890,7 @@
       o.getContext("2d").drawImage(cv, x0, y0, cw, ch, 0, 0, o.width, o.height);
       url = hasAlpha ? o.toDataURL("image/webp", 0.88) : o.toDataURL("image/jpeg", 0.86);
       if (hasAlpha && url.indexOf("data:image/webp") !== 0) url = o.toDataURL("image/png");
-      if (url.length < 1200000) return { url: url, w: o.width, h: o.height };
+      if (url.length < (limit || 1200000)) return { url: url, w: o.width, h: o.height };
       k *= 0.8;
     }
     return { url: url, w: o.width, h: o.height };
@@ -907,6 +908,24 @@
     if (Object.keys(gone).length) act(function () { T.items = T.items.filter(function (i) { return !gone[i.scrapId]; }); Object.keys(gone).forEach(function (k) { delete T.scraps[k]; }); SEL = null; });
     saveMine(); renderDrawer();
     if (A.cat === "yours" || A.cat === "all") setCat(A.cat === "yours" && !ARCH.some(function (a) { return a.category === "yours"; }) ? "all" : A.cat, 0); else renderCats();
+  }
+  // lift the background off a piece already on the workbench; the result replaces that piece only
+  function liftOnBench(it) {
+    var sc = T.scraps[it.scrapId]; if (!sc) return;
+    toast("OPENING THE LIFTER…");
+    loadImg(imgOf(sc)).then(function (img) {
+      var k = Math.min(1, 1200 / Math.max(sc.crop.w, sc.crop.h)), cw = Math.max(1, Math.round(sc.crop.w * k)), ch = Math.max(1, Math.round(sc.crop.h * k));
+      var c = document.createElement("canvas"); c.width = cw; c.height = ch; var x = c.getContext("2d");
+      var m = sc.mask, path = new Path2D(); path.addPath(new Path2D((SHAPES[sc.shape] || SHAPES.circle).d), new DOMMatrix().translate(m.cx, m.cy).rotate(m.rot).translate(-m.w / 2, -m.h / 2).scale(m.w, m.h));
+      x.scale(k, k); x.translate(-sc.crop.x, -sc.crop.y); x.clip(path); x.drawImage(img, 0, 0, sc.imgW, sc.imgH);
+      openWorkshop(c, sc.title || "piece", { alpha: true, onSave: function (ex) {
+        var nid = rid("s"), ns = copy(sc);
+        ns.id = nid; ns.srcId = ""; ns.img = ex.url; ns.imgW = ex.w; ns.imgH = ex.h; ns.crop = { x: 0, y: 0, w: ex.w, h: ex.h };
+        ns.mask = { cx: ex.w / 2, cy: ex.h / 2, w: ex.w, h: ex.h, rot: 0 }; ns.shape = "rectangle"; ns.alpha = true; ns.ratio = ex.w / ex.h; ns.aspect = ex.w / ex.h;
+        act(function () { T.scraps[nid] = ns; it.scrapId = nid; });
+        toast("LIFTED. IT IS BARE NOW.");
+      } });
+    }, function () { toast("THAT PIECE WON'T COME LOOSE (IT BELONGS TO ANOTHER SITE)."); });
   }
   function openOwn() {
     var h = '<h2>YOUR OWN PIECES</h2><p class="sub">bring up to two pictures of your own. lift the background off them and they become cut-outs for this session. they stay in this browser only: nothing is sent anywhere, and no one else will ever see them.</p>';
@@ -936,22 +955,22 @@
       loadImg(it.image).then(function (im) { openWorkshop(im, it.title.slice(0, 40)); }, function () { toast("THAT FOLIO WON'T COME LOOSE. TRY ONE OF YOUR OWN."); });
     };
   }
-  function openWorkshop(img, name) {
+  function openWorkshop(img, name, opts) {
     var k = Math.min(1, 1200 / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height)), W = Math.round((img.naturalWidth || img.width) * k), H = Math.round((img.naturalHeight || img.height) * k);
     var cv = document.createElement("canvas"); cv.width = W; cv.height = H; var ctx = cv.getContext("2d"); ctx.drawImage(img, 0, 0, W, H);
     try { ctx.getImageData(0, 0, 1, 1); } catch (e) { toast("THAT PICTURE CAN'T BE EDITED (IT BELONGS TO ANOTHER SITE)."); return; }
-    var original = ctx.getImageData(0, 0, W, H), undo = [], hasAlpha = false;
+    var original = ctx.getImageData(0, 0, W, H), undo = [], hasAlpha = !!(opts && opts.alpha);
     var h = '<h2>THE BACKGROUND LIFTER</h2><p class="sub" id="lfHint">lift the background in one go, or tap a colour to rub it out. the chequerboard shows what is gone.</p>' +
       '<div class="lf-stage" id="lfStage"></div>' +
       '<div class="row lf-row"><button class="btn primary" id="lfAuto">LIFT THE BACKGROUND</button><button class="btn" id="lfUndo" disabled>UNDO</button><button class="btn" id="lfReset">START OVER</button></div>' +
       '<div class="row lf-row"><label class="bg-fade">TAP A COLOUR TO ERASE · REACH <input type="range" id="lfTol" min="5" max="90" value="32"></label></div>' +
-      '<div class="row lf-row"><input id="lfName" class="lf-name" maxlength="40" placeholder="name it (optional)" value="' + esc(name || "") + '"><button class="btn primary" id="lfSave">ADD TO MY PIECES</button><button class="btn" id="lfBack">BACK</button></div>' +
+      '<div class="row lf-row"><input id="lfName" class="lf-name" maxlength="40" placeholder="name it (optional)" value="' + esc(name || "") + '"><button class="btn primary" id="lfSave">' + (opts ? "USE ON THE WORKBENCH" : "ADD TO MY PIECES") + '</button><button class="btn" id="lfBack">BACK</button></div>' +
       '<p class="sub lf-note">the first lift downloads a small model (about 5 MB, then your browser remembers it). the picture itself never leaves this device.</p>';
     openModal(h);
     var stage = $("#lfStage"); cv.className = "lf-canvas"; stage.appendChild(cv);
     function push() { undo.push(ctx.getImageData(0, 0, W, H)); if (undo.length > 8) undo.shift(); $("#lfUndo").disabled = false; }
     $("#lfUndo").onclick = function () { if (!undo.length) return; ctx.putImageData(undo.pop(), 0, 0); this.disabled = !undo.length; };
-    $("#lfReset").onclick = function () { push(); ctx.putImageData(original, 0, 0); hasAlpha = false; };
+    $("#lfReset").onclick = function () { push(); ctx.putImageData(original, 0, 0); hasAlpha = !!(opts && opts.alpha); };
     $("#lfAuto").onclick = function () {
       var btn = this, hint = $("#lfHint"); btn.disabled = true; btn.textContent = "LIFTING… (a moment)";
       liftMask(cv).then(function (a) {
@@ -981,8 +1000,10 @@
       }
       ctx.putImageData(im, 0, 0); hasAlpha = true;
     });
-    $("#lfBack").onclick = openOwn;
+    $("#lfBack").onclick = opts ? closeModal : openOwn;
+    if (opts) { $("#lfName").hidden = true; $(".lf-note").hidden = false; }
     $("#lfSave").onclick = function () {
+      if (opts) { var ex2 = exportPiece(cv, true, true, 700000); if (!ex2) { toast("NOTHING LEFT OF IT. UNDO A STEP."); return; } closeModal(); opts.onSave(ex2); return; }
       if (MINE.length >= MAXMINE) { toast("BOTH PLACES ARE IN USE."); return; }
       if (!hasAlpha) {
         // check if erased any pixel at all; if not, keep as a whole picture
