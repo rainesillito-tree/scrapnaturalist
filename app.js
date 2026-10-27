@@ -33,6 +33,7 @@
   /* ---------- cut shapes (unit square paths; stretched to w×h at cut time) ---------- */
   function rrPath(r, cr) { var ry = cr * r; return "M" + cr + ",0 H" + (1 - cr) + " A" + cr + "," + ry + " 0 0 1 1," + ry + " V" + (1 - ry) + " A" + cr + "," + ry + " 0 0 1 " + (1 - cr) + ",1 H" + cr + " A" + cr + "," + ry + " 0 0 1 0," + (1 - ry) + " V" + ry + " A" + cr + "," + ry + " 0 0 1 " + cr + ",0Z"; }
   function starPath() { var d = ""; for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 0.2 : 0.5; d += (i ? "L" : "M") + (0.5 + Math.cos(a) * r).toFixed(3) + "," + (0.5 + Math.sin(a) * r).toFixed(3); } return d + "Z"; }
+  function flowerPath(n) { var d = "", N = 120; for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N, r = 0.36 + 0.14 * Math.abs(Math.cos(n * (a + Math.PI / 2) / 2)); d += (i ? "L" : "M") + (0.5 + Math.cos(a) * r).toFixed(3) + "," + (0.5 + Math.sin(a) * r).toFixed(3); } return d + "Z"; }
   var SHAPE_LIST = [
     { id: "rectangle", label: "Rectangle", r: 1.3, d: "M0,0H1V1H0Z" },
     { id: "square", label: "Square", r: 1, d: "M0,0H1V1H0Z" },
@@ -46,7 +47,18 @@
     { id: "crescent", label: "Crescent", r: 1, d: "M.72,.02 A.5,.5 0 1 0 .72,.98 A.62,.62 0 0 1 .72,.02Z" },
     { id: "blob", label: "Organic blob", r: 1.05, d: "M.5,.02 C.78,-.02 .98,.2 .97,.48 C.96,.76 .8,.98 .52,.97 C.24,.96 .03,.8 .03,.5 C.03,.22 .22,.06 .5,.02Z" },
     { id: "capsule-v", label: "Vertical capsule", r: 0.45, d: "M0,.225 A.5,.225 0 0 1 1,.225 V.775 A.5,.225 0 0 1 0,.775Z" },
-    { id: "capsule-h", label: "Horizontal capsule", r: 2.2, d: "M.227,0 H.773 A.227,.5 0 0 1 .773,1 H.227 A.227,.5 0 0 1 .227,0Z" }
+    { id: "capsule-h", label: "Horizontal capsule", r: 2.2, d: "M.227,0 H.773 A.227,.5 0 0 1 .773,1 H.227 A.227,.5 0 0 1 .227,0Z" },
+    { id: "mushroom", label: "Mushroom", r: 1, d: "M.5,.04 C.18,.04 .03,.3 .05,.52 C.06,.58 .12,.6 .2,.6 H.37 C.36,.72 .33,.85 .28,.94 C.27,.97 .3,.99 .34,.99 H.66 C.7,.99 .73,.97 .72,.94 C.67,.85 .64,.72 .63,.6 H.8 C.88,.6 .94,.58 .95,.52 C.97,.3 .82,.04 .5,.04Z" },
+    { id: "butterfly", label: "Butterfly", r: 1.15, d: "M.5,.4 C.58,.14 .8,.0 .94,.1 C1,.3 .88,.52 .62,.54 C.9,.62 .92,.9 .78,.96 C.64,.99 .55,.8 .5,.66 C.45,.8 .36,.99 .22,.96 C.08,.9 .1,.62 .38,.54 C.12,.52 0,.3 .06,.1 C.2,0 .42,.14 .5,.4Z" },
+    { id: "cloud", label: "Cloud", r: 1.5, d: "M.25,.92 C.06,.92 0,.7 .14,.6 C.1,.4 .3,.32 .4,.42 C.44,.12 .78,.1 .82,.36 C1,.34 1.04,.62 .92,.7 C1,.84 .94,.92 .8,.92Z" },
+    { id: "leaf", label: "Leaf", r: 1, d: "M.08,.92 C.02,.4 .4,.04 .94,.06 C.96,.6 .6,.98 .08,.92Z" },
+    { id: "heart", label: "Heart", r: 1.08, d: "M.5,.95 C.1,.65 0,.4 .12,.2 C.26,0 .46,.1 .5,.28 C.54,.1 .74,0 .88,.2 C1,.4 .9,.65 .5,.95Z" },
+    { id: "flower", label: "Flower", r: 1, d: flowerPath(6) },
+    { id: "teardrop", label: "Teardrop", r: 0.8, d: "M.5,0 C.5,.25 .95,.45 .95,.68 A.45,.3 0 0 1 .05,.68 C.05,.45 .5,.25 .5,0Z" },
+    { id: "ghost", label: "Ghost", r: 0.87, d: "M.1,1 V.45 C.1,.15 .3,0 .5,0 C.7,0 .9,.15 .9,.45 V1 L.77,.88 L.63,1 L.5,.88 L.37,1 L.23,.88Z" },
+    { id: "house", label: "House", r: 1, d: "M.5,.02 L.98,.45 H.86 V.98 H.14 V.45 H.02Z" },
+    { id: "pine", label: "Pine tree", r: 0.71, d: "M.5,0 L.82,.4 H.68 L.95,.75 H.56 V1 H.44 V.75 H.05 L.32,.4 H.18Z" },
+    { id: "hexagon", label: "Hexagon", r: 1.1, d: "M.25,.04 H.75 L1,.5 L.75,.96 H.25 L0,.5Z" }
   ];
   var SHAPES = {}; SHAPE_LIST.forEach(function (s) { SHAPES[s.id] = s; });
 
@@ -108,7 +120,18 @@
   $("#modal").addEventListener("pointerdown", function (e) { if (e.target === $("#modal")) closeModal(); });
 
   /* ---------- the wider field: open collections searched from the page ---------- */
-  function jget(url) { return fetch(url, { mode: "cors" }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.text().then(function (t) { try { return JSON.parse(t); } catch (e) { throw new Error("it has closed its doors or changed its address"); } }); }); }
+  function parseJSON(t) { try { return JSON.parse(t); } catch (e) { throw new Error("it has closed its doors or changed its address"); } }
+  function jget(url) {
+    /* direct first; if the browser or network refuses, go round by a couple of open relays */
+    var routes = [url, "https://corsproxy.io/?url=" + encodeURIComponent(url), "https://api.allorigins.win/raw?url=" + encodeURIComponent(url)];
+    function tryRoute(i) {
+      return fetch(routes[i], { mode: "cors" }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.text(); }).then(parseJSON).catch(function (e) {
+        if (i + 1 < routes.length) return tryRoute(i + 1);
+        throw e;
+      });
+    }
+    return tryRoute(0);
+  }
   function strip(h) { var d = document.createElement("div"); d.innerHTML = h || ""; return (d.textContent || "").trim().slice(0, 90); }
   function prox(u) { return "https://wsrv.nl/?url=" + encodeURIComponent(u) + "&w=1200"; }
   var SOURCES = {
@@ -180,6 +203,45 @@
           out.push({ id: "loc-" + String(x.id || x.url).replace(/[^a-z0-9]+/gi, "-").slice(-40), title: String(x.title || "Untitled").slice(0, 80), thumb: imgs[0].replace(/#.*$/, ""), image: url, w: bw || 900, h: mh ? +mh[1] : 700, credit: "Library of Congress", link: x.url });
         });
         return out;
+      });
+    } },
+    met: { label: "The Met (open access)", search: function (q, page) {
+      var u = "https://collectionapi.metmuseum.org/public/collection/v1/search?hasImages=true&isPublicDomain=true&q=" + encodeURIComponent(q);
+      return jget(u).then(function (d) {
+        var ids = (d.objectIDs || []).slice(page * 24, page * 24 + 24);
+        return Promise.all(ids.map(function (id) {
+          return jget("https://collectionapi.metmuseum.org/public/collection/v1/objects/" + id).then(function (x) {
+            if (!x.primaryImageSmall) return null;
+            return { id: "met-" + id, title: String(x.title || "Untitled").slice(0, 80), thumb: x.primaryImageSmall, image: x.primaryImage || x.primaryImageSmall, w: 900, h: 1100, credit: "The Metropolitan Museum of Art" + (x.artistDisplayName ? ", " + x.artistDisplayName : "") + " (public domain)", link: x.objectURL };
+          }).catch(function () { return null; });
+        })).then(function (l) { return l.filter(Boolean); });
+      });
+    } },
+    ia: { label: "Internet Archive (public-domain images)", search: function (q, page) {
+      var u = "https://archive.org/advancedsearch.php?output=json&rows=40&page=" + (page + 1) + "&fl[]=identifier&fl[]=title&q=" + encodeURIComponent("(" + q + ") AND mediatype:image AND (licenseurl:*publicdomain* OR collection:(biodivlibrary OR flickrcommons OR nasa))");
+      return jget(u).then(function (d) {
+        return ((d.response && d.response.docs) || []).map(function (x) {
+          var img = "https://archive.org/services/img/" + x.identifier;
+          return { id: "ia-" + x.identifier, title: String(x.title || x.identifier).slice(0, 80), thumb: img, image: img, w: 600, h: 600, credit: "Internet Archive (public domain)", link: "https://archive.org/details/" + x.identifier };
+        });
+      });
+    } },
+    nasa: { label: "NASA Image Library", search: function (q, page) {
+      var u = "https://images-api.nasa.gov/search?media_type=image&page_size=40&page=" + (page + 1) + "&q=" + encodeURIComponent(q);
+      return jget(u).then(function (d) {
+        var items = (d.collection && d.collection.items) || [];
+        return items.filter(function (x) { return x.links && x.links[0] && x.data && x.data[0]; }).map(function (x) {
+          var t = x.links[0].href, med = t.replace("~thumb", "~medium");
+          return { id: "nasa-" + x.data[0].nasa_id, title: String(x.data[0].title || "").slice(0, 80), thumb: t, image: med, w: 1000, h: 800, credit: "NASA (public domain)", link: "https://images.nasa.gov/details/" + encodeURIComponent(x.data[0].nasa_id) };
+        });
+      });
+    } },
+    openverse: { label: "Openverse (CC0 & public domain)", search: function (q, page) {
+      var u = "https://api.openverse.org/v1/images/?license=cc0,pdm&page_size=40&page=" + (page + 1) + "&q=" + encodeURIComponent(q);
+      return jget(u).then(function (d) {
+        return (d.results || []).map(function (x) {
+          return { id: "ov-" + x.id, title: String(x.title || "Untitled").slice(0, 80), thumb: x.thumbnail || x.url, image: x.thumbnail || x.url, w: x.width || 800, h: x.height || 800, credit: (x.source || "Openverse") + (x.creator ? ", " + x.creator : "") + " (" + (x.license === "pdm" ? "public domain" : "CC0") + ")", link: x.foreign_landing_url };
+        });
       });
     } }
   };
