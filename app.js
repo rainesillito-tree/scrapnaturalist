@@ -337,10 +337,11 @@
 
   /* ---------- archive ---------- */
   var PAGES = ARCH.filter(function (a) { return !a.alpha; });
-  var A = { cat: "all", group: "", list: PAGES.slice(), idx: 0, ar: 0.75 };
+  var FIRST = (CATS.filter(function (c) { return ARCH.some(function (a) { return a.category === c.id; }); })[0] || { id: "cutouts" }).id;
+  var A = { cat: FIRST, group: "", list: ARCH.filter(function (a) { return a.category === FIRST; }), idx: 0, ar: 0.75 };
   function renderCats() {
     var counts = {}; ARCH.forEach(function (a) { counts[a.category] = (counts[a.category] || 0) + 1; });
-    var h = '<button class="cat' + (A.cat === "all" ? " on" : "") + '" data-c="all">ALL ' + pad3(PAGES.length) + "</button>";
+    var h = "";
     CATS.forEach(function (c) { if (counts[c.id]) h += '<button class="cat' + (A.cat === c.id ? " on" : "") + '" data-c="' + c.id + '" title="' + esc(c.subs) + '">' + c.label + " " + pad3(counts[c.id]) + "</button>"; });
     $("#cats").innerHTML = h;
   }
@@ -354,7 +355,7 @@
   $("#subcats").addEventListener("click", function (e) { var b = e.target.closest("[data-g]"); if (b) setCat(A.cat, 0, b.dataset.g); });
   function setCat(c, idx, g) {
     if (c !== A.cat) A.group = ""; if (g !== undefined) A.group = g;
-    A.cat = c; A.list = c === "all" ? PAGES.slice() : ARCH.filter(function (a) { return a.category === c && (!A.group || a.group === A.group); });
+    A.cat = c; A.list = ARCH.filter(function (a) { return a.category === c && (!A.group || a.group === A.group); });
     A.idx = clamp(idx || 0, 0, Math.max(0, A.list.length - 1));
     renderCats(); renderSubs(); renderPage(0);
     var on = $(".cat.on"); if (on && on.scrollIntoView) on.scrollIntoView({ inline: "center", block: "nearest" });
@@ -401,7 +402,7 @@
   })();
 
   $("#btnIndex").onclick = function () {
-    var h = '<h2>CONTENTS</h2><p class="sub">' + (A.cat === "all" ? "Everything in the field" : catLabel[A.cat]) + '. tap a folio to wander there.</p><div class="idx-grid">';
+    var h = '<h2>CONTENTS</h2><p class="sub">' + catLabel[A.cat] + '. tap a folio to wander there.</p><div class="idx-grid">';
     A.list.forEach(function (a, i) { h += '<button class="idx-item' + (i === A.idx ? " on" : "") + '" data-i="' + i + '"><img loading="lazy" alt="" src="' + esc(a.image) + '"><span>' + pad3(i + 1) + " " + esc(a.title) + "</span></button>"; });
     openModal(h + "</div>");
     $$("#sheet .idx-item").forEach(function (b) { b.onclick = function () { A.idx = +b.dataset.i; closeModal(); renderPage(0); }; });
@@ -969,7 +970,7 @@
     var gone = {}; Object.keys(T.scraps).forEach(function (k) { if (T.scraps[k].srcId === id) gone[k] = 1; });
     if (Object.keys(gone).length) act(function () { T.items = T.items.filter(function (i) { return !gone[i.scrapId]; }); Object.keys(gone).forEach(function (k) { delete T.scraps[k]; }); SEL = null; });
     saveMine(); renderDrawer();
-    if (A.cat === "yours" || A.cat === "all") setCat(A.cat === "yours" && !ARCH.some(function (a) { return a.category === "yours"; }) ? "all" : A.cat, 0); else renderCats();
+    if (A.cat === "yours") setCat(!ARCH.some(function (a) { return a.category === "yours"; }) ? FIRST : A.cat, 0); else renderCats();
   }
   // lift the background off a piece already on the workbench; the result replaces that piece only
   function liftOnBench(it) {
@@ -1084,7 +1085,7 @@
   function relayout() { if (view === "archive") fitBox($("#pageBox"), $("#aStage"), A.ar, 12); else if (view === "cut") layoutCut(); else if (view === "table") layoutTable(); }
   window.addEventListener("resize", relayout);
   if (window.ResizeObserver) { new ResizeObserver(relayout).observe($("#views")); }
-  buildShapeButtons(); renderCats(); renderHome(); renderDrawer();
+  buildShapeButtons(); renderCats(); renderSubs(); renderHome(); renderDrawer();
   // expose for debugging
   window.__collage = { state: function () { return { scraps: scraps, T: T }; } };
 })();
