@@ -35,3 +35,7 @@ Original ink drawings by Rai Sillito / The Luminarium (skeleton series), backgro
 
 ## More washi tape (14) and pencil starbursts (15)
 Painted procedurally by `tools/make_overlays.py` and the starburst generator (no source images).
+
+## Clipped words, second batch & marginalia
+- `wd-*` single words (and, the, if, we, you, dream, possibility, love and more): plain text set in open-licence fonts (Lora, Inter, Liberation, GFS Baskerville, Courier, DejaVu) by `tools/make_words_more.py`.
+- `mg-*` marginalia (specimen tags, field labels, index cards, catalogue strips, ticket stubs, postmarks, torn notes, number tiles): drawn in code, text written for this project, by `tools/make_marginalia.py`.
