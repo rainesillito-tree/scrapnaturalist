@@ -1463,6 +1463,23 @@
     { id:"pond-and-ducks", category:"landscapes", title:"A Pond, Reeds and Small Ducks", image:"images/pond-and-ducks.jpg", w:1067, h:1600, tags:["pond", "reeds", "ducks", "reflection", "winter"] },
     { id:"river-rapids", category:"landscapes", title:"The River Hurrying Through Rock", image:"images/river-rapids.jpg", w:1246, h:1600, tags:["river", "rapids", "rocks", "pines", "black and white"] },
     { id:"mesa-painting", category:"landscapes", title:"Red Cliffs at Sundown, Painted", image:"images/mesa-painting.jpg", w:1600, h:1280, tags:["mesa", "painting", "desert", "cliffs", "sunset"] },
+    { id:"fog-walker-ruin", category:"landscapes", title:"Figure In The Fog, Ruin Beyond", image:"images/fog-walker-ruin.jpg", w:1024, h:1024, tags:["fog", "moor", "figure", "ruin", "night"] },
+    { id:"ink-columns-walker", category:"landscapes", title:"Walker Among Ink Columns", image:"images/ink-columns-walker.jpg", w:1024, h:1024, tags:["ink", "brush", "figure", "black and white"] },
+    { id:"checker-doorway", category:"landscapes", title:"A Door Ajar Onto Light, Checkered Floor", image:"images/checker-doorway.jpg", w:1024, h:1024, tags:["door", "light", "checkerboard", "halftone"] },
+    { id:"red-pier-crowd", category:"landscapes", title:"Crowd On A Red Pier", image:"images/red-pier-crowd.jpg", w:1024, h:1024, tags:["pier", "water", "crowd", "red", "dusk"] },
+    { id:"misted-ridge-walker", category:"landscapes", title:"Walker On A Misted Ridge", image:"images/misted-ridge-walker.jpg", w:1024, h:1024, tags:["ridge", "mist", "figure", "black and white"] },
+    { id:"balloon-blue-wood", category:"landscapes", title:"Red Balloon Over A Blue Wood", image:"images/balloon-blue-wood.jpg", w:1024, h:1024, tags:["balloon", "forest", "fog", "figure"] },
+    { id:"sepia-furrows", category:"landscapes", title:"Ruts In A Sepia Field", image:"images/sepia-furrows.jpg", w:928, h:1232, tags:["field", "furrows", "tree", "sepia", "wires"] },
+    { id:"balcony-street", category:"landscapes", title:"Street Of Balconies, Sepia", image:"images/balcony-street.jpg", w:928, h:1232, tags:["street", "cobbles", "balcony", "sepia"] },
+    { id:"tram-street", category:"landscapes", title:"Tram Street, A Plume Of Smoke", image:"images/tram-street.jpg", w:928, h:1232, tags:["tram", "street", "smoke", "sepia"] },
+    { id:"magenta-sunwood", category:"landscapes", title:"Sunburst Wood, Magenta", image:"images/magenta-sunwood.jpg", w:928, h:1232, tags:["forest", "sun", "magenta", "trees"] },
+    { id:"green-avenue-sun", category:"landscapes", title:"Avenue Of Trees, Green Light", image:"images/green-avenue-sun.jpg", w:928, h:1232, tags:["avenue", "trees", "sun", "green", "film"] },
+    { id:"split-road-trees", category:"landscapes", title:"Split Road, Teal And Rose", image:"images/split-road-trees.jpg", w:928, h:1232, tags:["road", "trees", "split", "pink", "teal"] },
+    { id:"shard-road-sun", category:"landscapes", title:"Shattered Light On A Field Road", image:"images/shard-road-sun.jpg", w:928, h:1232, tags:["field", "road", "shards", "sun", "sepia"] },
+    { id:"swirl-farmhouse", category:"landscapes", title:"Farmhouse In A Whirl Of Light", image:"images/swirl-farmhouse.jpg", w:928, h:1232, tags:["farmhouse", "prairie", "light trails", "sepia"] },
+    { id:"rain-rail", category:"landscapes", title:"Raindrops On A Rail", image:"images/rain-rail.jpg", w:640, h:640, tags:["rain", "drops", "sky", "clouds"] },
+    { id:"moon-bare-tree", category:"landscapes", title:"Half Moon In A Bare Tree", image:"images/moon-bare-tree.jpg", w:640, h:640, tags:["moon", "tree", "night", "blue"] },
+    { id:"dusk-poles", category:"landscapes", title:"Dusk Along The Poles", image:"images/dusk-poles.jpg", w:640, h:640, tags:["dusk", "horizon", "poles", "prairie"] },
   ];
   MY_IMAGES.forEach(function (it) { archive.push(it); });
   // real images lead each section; the drawn plates follow

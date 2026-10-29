@@ -39,3 +39,6 @@ Painted procedurally by `tools/make_overlays.py` and the starburst generator (no
 ## Clipped words, second batch & marginalia
 - `wd-*` single words (and, the, if, we, you, dream, possibility, love and more): plain text set in open-licence fonts (Lora, Inter, Liberation, GFS Baskerville, Courier, DejaVu) by `tools/make_words_more.py`.
 - `mg-*` marginalia (specimen tags, field labels, index cards, catalogue strips, ticket stubs, postmarks, torn notes, number tiles): drawn in code, text written for this project, by `tools/make_marginalia.py`.
+
+## Terrain additions (Oct 28)
+17 photographs and image-works supplied by Rai Sillito / The Luminarium: fog and ink walkers, red pier, balloon wood, sepia fields and streets, light-struck roads, rain, moon and dusk.
