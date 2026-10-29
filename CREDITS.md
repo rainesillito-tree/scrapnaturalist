@@ -42,3 +42,6 @@ Painted procedurally by `tools/make_overlays.py` and the starburst generator (no
 
 ## Terrain additions (Oct 28)
 17 photographs and image-works supplied by Rai Sillito / The Luminarium: fog and ink walkers, red pier, balloon wood, sepia fields and streets, light-struck roads, rain, moon and dusk.
+
+## Paper & Marks, second batch
+`pm-*`: torn paper scraps (cream, kraft, graph, ruled, ledger, tea-stained, cards) and hand-drawn marks (circles, underlines, arrows, cross-outs, hatching, brush swipes, ink splatter, coffee rings) generated procedurally by `tools/make_marks.py`. Nothing taken from other sources.
