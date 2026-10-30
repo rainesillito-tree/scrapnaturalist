@@ -449,6 +449,9 @@
   function bgURL() { if (!T.bg) return ""; var a = byId[T.bg.id]; return a ? a.image : (UP[T.bg.id] || ""); }
   function paperURI(type, W, H) { var k = type + W + "x" + H; return paperCache[k] || (paperCache[k] = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(paperSVG(type, W, H))); }
 
+  var BGDIM = {};
+  function bgDimsFor(url, cb) { if (BGDIM[url]) return BGDIM[url]; var im = new Image(); im.onload = function () { BGDIM[url] = [im.naturalWidth, im.naturalHeight]; if (cb) cb(); }; im.src = url; return null; }
+  function bgGeom(iw, ih, W, H, bg) { var z = Math.max(1, (bg && bg.z) || 1), k = Math.max(W / iw, H / ih) * z, dw = iw * k, dh = ih * k, fx = bg && bg.x != null ? bg.x : 0.5, fy = bg && bg.y != null ? bg.y : 0.5; return { dw: dw, dh: dh, dx: (W - dw) * fx, dy: (H - dh) * fy }; }
   /* ---------- table: layout + render ---------- */
   var K = 1;
   function dims() { return RATIOS[T.ratio] || RATIOS.portrait; }
@@ -462,7 +465,10 @@
     if (bu) {
       var f = (T.bg.fade || 0) / 100, c = hex3(PAPER_BASE[T.paper] || PAPER_BASE.warm), tint = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + f + ")";
       p.style.backgroundImage = "linear-gradient(" + tint + "," + tint + '), url("' + bu + '"), ' + pu;
-      p.style.backgroundSize = "auto, cover, auto"; p.style.backgroundPosition = "0 0, center, 0 0"; p.style.backgroundRepeat = "no-repeat";
+      var bd = bgDimsFor(bu, layoutTable);
+      if (bd) { var g = bgGeom(bd[0], bd[1], dm[0], dm[1], T.bg); p.style.backgroundSize = "auto, " + g.dw.toFixed(1) + "px " + g.dh.toFixed(1) + "px, auto"; p.style.backgroundPosition = "0 0, " + g.dx.toFixed(1) + "px " + g.dy.toFixed(1) + "px, 0 0"; }
+      else { p.style.backgroundSize = "auto, cover, auto"; p.style.backgroundPosition = "0 0, center, 0 0"; }
+      p.style.backgroundRepeat = "no-repeat";
     } else { p.style.backgroundImage = pu; p.style.backgroundSize = ""; p.style.backgroundPosition = ""; p.style.backgroundRepeat = ""; }
   }
   function getItem(u) { for (var i = 0; i < T.items.length; i++) if (T.items[i].uid === u) return T.items[i]; return null; }
@@ -486,7 +492,7 @@
   $("#ratioSel").innerHTML = Object.keys(RATIOS).map(function (k) { return '<option value="' + k + '">' + RATIO_LABELS[k] + "</option>"; }).join("");
   $("#paperSel").onchange = function () { var v = this.value; act(function () { T.paper = v; }); layoutTable(); };
   /* ---------- photo background ---------- */
-  function setBg(id) { var fade = T.bg ? T.bg.fade : 0; act(function () { T.bg = id ? { id: id, fade: fade || 0 } : null; }); layoutTable(); }
+  function setBg(id) { var fade = T.bg ? T.bg.fade : 0; act(function () { T.bg = id ? { id: id, fade: fade || 0, z: 1, x: 0.5, y: 0.5 } : null; }); layoutTable(); }
   function shrinkPhoto(file, cb) {
     var fr = new FileReader();
     fr.onload = function () {
@@ -504,11 +510,12 @@
     var h = '<h2>A PHOTO FOR THE GROUND</h2><p class="sub">it covers the whole sheet. everything you paste lands on top.</p><div class="bg-grid">';
     ups.forEach(function (u) { h += '<button data-bg="' + u + '" class="' + (T.bg && T.bg.id === u ? "on" : "") + '"><img alt="" src="' + esc(UP[u]) + '"><span>YOURS</span></button>'; });
     pool.forEach(function (a) { h += '<button data-bg="' + esc(a.id) + '" class="' + (T.bg && T.bg.id === a.id ? "on" : "") + '"><img loading="lazy" alt="" src="' + esc(a.image) + '"><span>' + esc(a.title) + "</span></button>"; });
-    h += '</div><div class="row bg-row"><label class="btn file">YOUR OWN PHOTO…<input type="file" id="bgFile" accept="image/*" hidden></label><button class="btn" id="bgNone">BARE SHEET</button>' +
+    h += '</div><div class="row bg-row"><label class="btn file">YOUR OWN PHOTO…<input type="file" id="bgFile" accept="image/*" hidden></label><button class="btn" id="bgNone">BARE SHEET</button>' + (T.bg ? '<button class="btn" id="bgCrop">CROP…</button>' : "") + '' +
       '<label class="bg-fade">LET THE PAPER SHOW THROUGH <input type="range" id="bgFade" min="0" max="85" value="' + (T.bg ? T.bg.fade || 0 : 0) + '"' + (T.bg ? "" : " disabled") + '></label><button class="btn primary" id="bgDone">DONE</button></div>';
     openModal(h);
     $$("#sheet [data-bg]").forEach(function (b) { b.onclick = function () { setBg(b.dataset.bg); closeModal(); }; });
     $("#bgNone").onclick = function () { setBg(null); closeModal(); };
+    if ($("#bgCrop")) $("#bgCrop").onclick = function () { closeModal(); openCrop(); };
     $("#bgDone").onclick = closeModal;
     $("#bgFile").onchange = function () {
       var f = this.files && this.files[0]; if (!f) return;
@@ -522,6 +529,30 @@
     $("#bgFade").oninput = function () { if (!T.bg) return; if (!before) before = snapStr(); T.bg.fade = +this.value; layoutTable(); };
     $("#bgFade").onchange = function () { if (before) { pushHist(before); before = null; renderTable(); } };
   }
+  function openCrop() {
+    if (!T.bg) { toast("LAY A GROUND PHOTO FIRST."); return; }
+    var url = bgURL(), dm = dims(), PW = Math.min(420, window.innerWidth - 80), PH = PW * dm[1] / dm[0], before = snapStr();
+    var h = '<h2>CROP THE GROUND</h2><p class="sub">drag the picture to choose what shows. slide to zoom in. the box is your sheet.</p>' +
+      '<div id="cropBox" style="position:relative;margin:0 auto;width:' + PW + 'px;height:' + PH + 'px;border:1px solid #2b2a26;overflow:hidden;cursor:grab;touch-action:none;background:#ddd no-repeat"></div>' +
+      '<div class="row bg-row"><label class="bg-fade">ZOOM <input type="range" id="cropZ" min="100" max="400" value="' + Math.round((T.bg.z || 1) * 100) + '"></label><button class="btn" id="cropReset">RESET</button><button class="btn primary" id="cropDone">DONE</button></div>';
+    openModal(h);
+    var box = $("#cropBox");
+    function paint() { var bd = BGDIM[url]; if (!bd) { bgDimsFor(url, paint); return; } var g = bgGeom(bd[0], bd[1], PW, PH, T.bg); box.style.backgroundImage = 'url("' + url + '")'; box.style.backgroundSize = g.dw + "px " + g.dh + "px"; box.style.backgroundPosition = g.dx + "px " + g.dy + "px"; layoutTable(); }
+    paint();
+    var drag = null;
+    box.onpointerdown = function (e) { drag = { x: e.clientX, y: e.clientY }; box.setPointerCapture(e.pointerId); box.style.cursor = "grabbing"; };
+    box.onpointermove = function (e) {
+      if (!drag) return; var bd = BGDIM[url]; if (!bd) return; var g = bgGeom(bd[0], bd[1], PW, PH, T.bg), ddx = e.clientX - drag.x, ddy = e.clientY - drag.y; drag = { x: e.clientX, y: e.clientY };
+      if (PW - g.dw < -0.5) T.bg.x = Math.max(0, Math.min(1, (T.bg.x == null ? 0.5 : T.bg.x) + ddx / (PW - g.dw)));
+      if (PH - g.dh < -0.5) T.bg.y = Math.max(0, Math.min(1, (T.bg.y == null ? 0.5 : T.bg.y) + ddy / (PH - g.dh)));
+      paint();
+    };
+    box.onpointerup = box.onpointercancel = function () { drag = null; box.style.cursor = "grab"; };
+    $("#cropZ").oninput = function () { T.bg.z = +this.value / 100; paint(); };
+    $("#cropReset").onclick = function () { T.bg.z = 1; T.bg.x = 0.5; T.bg.y = 0.5; $("#cropZ").value = 100; paint(); };
+    $("#cropDone").onclick = function () { pushHist(before); renderTable(); closeModal(); };
+  }
+  $("#btnCrop").onclick = openCrop;
   $("#btnBg").onclick = openBg;
   $("#btnBgPage").onclick = function () { var it = A.list[A.idx]; if (!it || it.alpha) return; setBg(it.id); toast("THE GROUND IS LAID."); };
   $("#ratioSel").onchange = function () { var v = this.value; act(function () { T.ratio = v; }); layoutTable(); };
@@ -727,8 +758,8 @@
     return loadImg(paperURI(T.paper, W, H)).then(function (pimg) {
       ctx.drawImage(pimg, 0, 0, cv.width, cv.height);
       var bu = bgURL(), chain = bu ? loadImg(bu).then(function (bi) {
-        var k = Math.max(cv.width / bi.width, cv.height / bi.height), dw = bi.width * k, dh = bi.height * k;
-        ctx.drawImage(bi, (cv.width - dw) / 2, (cv.height - dh) / 2, dw, dh);
+        var g = bgGeom(bi.width, bi.height, cv.width, cv.height, T.bg);
+        ctx.drawImage(bi, g.dx, g.dy, g.dw, g.dh);
         var c = hex3(PAPER_BASE[T.paper] || PAPER_BASE.warm); ctx.fillStyle = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + (T.bg.fade || 0) / 100 + ")"; ctx.fillRect(0, 0, cv.width, cv.height);
       }) : Promise.resolve();
       T.items.forEach(function (it) {
