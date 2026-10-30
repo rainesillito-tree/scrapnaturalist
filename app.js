@@ -34,6 +34,18 @@
   function rrPath(r, cr) { var ry = cr * r; return "M" + cr + ",0 H" + (1 - cr) + " A" + cr + "," + ry + " 0 0 1 1," + ry + " V" + (1 - ry) + " A" + cr + "," + ry + " 0 0 1 " + (1 - cr) + ",1 H" + cr + " A" + cr + "," + ry + " 0 0 1 0," + (1 - ry) + " V" + ry + " A" + cr + "," + ry + " 0 0 1 " + cr + ",0Z"; }
   function starPath() { var d = ""; for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 0.2 : 0.5; d += (i ? "L" : "M") + (0.5 + Math.cos(a) * r).toFixed(3) + "," + (0.5 + Math.sin(a) * r).toFixed(3); } return d + "Z"; }
   function flowerPath(n) { var d = "", N = 120; for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N, r = 0.36 + 0.14 * Math.abs(Math.cos(n * (a + Math.PI / 2) / 2)); d += (i ? "L" : "M") + (0.5 + Math.cos(a) * r).toFixed(3) + "," + (0.5 + Math.sin(a) * r).toFixed(3); } return d + "Z"; }
+  function tornPath(seed, kind) { var st = seed * 9301 + 49297; function rnd() { st = (st * 9301 + 49297) % 233280; return st / 233280; }
+    var N = 90, pts = [], ph = rnd() * 6.28, ph2 = rnd() * 6.28;
+    for (var i = 0; i < N; i++) { var t = i / N, a = t * 2 * Math.PI, c = Math.cos(a), sn = Math.sin(a), rr;
+      if (kind === "strip") { var m = Math.max(Math.abs(c) / 0.5, Math.abs(sn) / 0.5); rr = 1 / Math.max(m, 0.001); rr = Math.min(rr, 1.6); }
+      else if (kind === "wedge") { rr = 0.72 + 0.2 * Math.cos(a * 2 + ph); }
+      else if (kind === "blob") { rr = 0.8 + 0.12 * Math.sin(a * 3 + ph) + 0.06 * Math.sin(a * 5 + ph2); }
+      else { var m2 = Math.pow(Math.pow(Math.abs(c), 6) + Math.pow(Math.abs(sn), 6), 1 / 6); rr = 0.5 / Math.max(m2, 0.001) * 0.98; }
+      var j = 1 + (rnd() - 0.5) * 0.09 + 0.035 * Math.sin(a * 9 + ph) + 0.02 * Math.sin(a * 17 + ph2);
+      var x = c * rr * j, y = sn * rr * j; if (kind !== "strip" && kind !== "sheet") { x *= 0.5; y *= 0.5; } else { x *= (kind === "strip" ? 1 : 1); }
+      pts.push([x, y]); }
+    var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; pts.forEach(function (p) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+    return pts.map(function (p, i) { return (i ? "L" : "M") + ((p[0] - x0) / (x1 - x0)).toFixed(3) + "," + ((p[1] - y0) / (y1 - y0)).toFixed(3); }).join("") + "Z"; }
   var SHAPE_LIST = [
     { id: "rectangle", label: "Rectangle", r: 1.3, d: "M0,0H1V1H0Z" },
     { id: "square", label: "Square", r: 1, d: "M0,0H1V1H0Z" },
@@ -58,7 +70,15 @@
     { id: "ghost", label: "Ghost", r: 0.87, d: "M.1,1 V.45 C.1,.15 .3,0 .5,0 C.7,0 .9,.15 .9,.45 V1 L.77,.88 L.63,1 L.5,.88 L.37,1 L.23,.88Z" },
     { id: "house", label: "House", r: 1, d: "M.5,.02 L.98,.45 H.86 V.98 H.14 V.45 H.02Z" },
     { id: "pine", label: "Pine tree", r: 0.71, d: "M.5,0 L.82,.4 H.68 L.95,.75 H.56 V1 H.44 V.75 H.05 L.32,.4 H.18Z" },
-    { id: "hexagon", label: "Hexagon", r: 1.1, d: "M.25,.04 H.75 L1,.5 L.75,.96 H.25 L0,.5Z" }
+    { id: "hexagon", label: "Hexagon", r: 1.1, d: "M.25,.04 H.75 L1,.5 L.75,.96 H.25 L0,.5Z" },
+    { id: "torn-a", label: "Torn scrap A", r: 1.2, d: tornPath(3, "sheet") },
+    { id: "torn-b", label: "Torn scrap B", r: 0.85, d: tornPath(11, "sheet") },
+    { id: "torn-c", label: "Torn strip", r: 2.6, d: tornPath(7, "sheet") },
+    { id: "torn-d", label: "Torn tall strip", r: 0.38, d: tornPath(19, "sheet") },
+    { id: "torn-e", label: "Torn wedge", r: 1.1, d: tornPath(5, "wedge") },
+    { id: "torn-f", label: "Torn blob", r: 1.0, d: tornPath(23, "blob") },
+    { id: "torn-g", label: "Torn scrap C", r: 1.0, d: tornPath(31, "sheet") },
+    { id: "torn-h", label: "Torn scrap D", r: 1.5, d: tornPath(41, "sheet") }
   ];
   var SHAPES = {}; SHAPE_LIST.forEach(function (s) { SHAPES[s.id] = s; });
 

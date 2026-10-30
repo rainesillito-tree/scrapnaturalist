@@ -45,3 +45,12 @@ Painted procedurally by `tools/make_overlays.py` and the starburst generator (no
 
 ## Paper & Marks, second batch
 `pm-*`: torn paper scraps (cream, kraft, graph, ruled, ledger, tea-stained, cards) and hand-drawn marks (circles, underlines, arrows, cross-outs, hatching, brush swipes, ink splatter, coffee rings) generated procedurally by `tools/make_marks.py`. Nothing taken from other sources.
+
+## Moths, cloud, Morris patterns (Oct 30)
+- Garden tiger moth, peacock butterfly, bumblebee: Rijksmuseum, CC0, cut out from screenshots.
+- Dusk clouds oil sketch: public-domain museum painting (supplied by Rai).
+- William Morris wallpapers/textile (Medway, Tulip and Willow, Violet and Columbine): public domain.
+- Paper sheets (images/sheet-*.jpg) and torn Snip shapes: generated procedurally (tools/make_sheets.py), no outside material.
+
+## From Rai's collage photos (Oct 30)
+- Word strips and stickers cut from Rai's own collage pages (cg-*). The strips are her clippings. Sticker artwork (butterflies, flowers, engraved bird, moon cards) is from commercial sticker/paper sheets she owns; licence unverified, so use for personal collage and check before selling.
