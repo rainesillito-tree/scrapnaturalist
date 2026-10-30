@@ -119,185 +119,49 @@
   }
   $("#modal").addEventListener("pointerdown", function (e) { if (e.target === $("#modal")) closeModal(); });
 
-  /* ---------- the wider field: open collections searched from the page ---------- */
-  function parseJSON(t) { try { return JSON.parse(t); } catch (e) { throw new Error("it has closed its doors or changed its address"); } }
-  function jget(url) {
-    /* direct first; if the browser or network refuses, go round by a couple of open relays */
-    var routes = [url, "https://corsproxy.io/?url=" + encodeURIComponent(url), "https://api.allorigins.win/raw?url=" + encodeURIComponent(url)];
-    function tryRoute(i) {
-      return fetch(routes[i], { mode: "cors" }).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.text(); }).then(parseJSON).catch(function (e) {
-        if (i + 1 < routes.length) return tryRoute(i + 1);
-        throw e;
-      });
-    }
-    return tryRoute(0);
-  }
-  function strip(h) { var d = document.createElement("div"); d.innerHTML = h || ""; return (d.textContent || "").trim().slice(0, 90); }
+  /* ---------- the wider field: a list of free, public-domain places to hunt ---------- */
   function prox(u) { return "https://wsrv.nl/?url=" + encodeURIComponent(u) + "&w=1200"; }
-  var SOURCES = {
-    wellcome: { label: "Wellcome Collection (esoteric, medical, occult)", search: function (q, page) {
-      var u = "https://api.wellcomecollection.org/catalogue/v2/images?query=" + encodeURIComponent(q) + "&locations.license=pdm,cc0&pageSize=40&page=" + (page + 1);
-      return jget(u).then(function (d) {
-        var out = [];
-        (d.results || []).forEach(function (x) {
-          var loc = (x.locations && x.locations[0]) || {}, src = (loc.url || "") + " " + ((x.thumbnail && x.thumbnail.url) || ""), m = /iiif\.wellcomecollection\.org\/image\/([^\/]+)\//.exec(src);
-          if (!m) return;
-          var base = "https://iiif.wellcomecollection.org/image/" + m[1], src2 = x.source || {};
-          out.push({ id: "wel-" + x.id, title: String(src2.title || "Untitled").slice(0, 80), thumb: base + "/full/260,/0/default.jpg", image: base + "/full/900,/0/default.jpg", w: 900, h: 1100, credit: "Wellcome Collection (" + ((loc.license && loc.license.label) || "public domain") + ")", link: "https://wellcomecollection.org/works/" + (src2.id || "") });
-        });
-        return out;
-      });
-    } },
-    commonssvg: { label: "Wikimedia Commons (drawings & SVG)", search: function (q, page) {
-      var u = "https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=40&gsroffset=" + (page * 40) + "&gsrsearch=" + encodeURIComponent(q + " filetype:drawing") + "&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1000&iiextmetadatafilter=LicenseShortName|Artist";
-      return jget(u).then(function (d) {
-        var pg = d.query && d.query.pages ? Object.keys(d.query.pages).map(function (k) { return d.query.pages[k]; }) : [], out = [];
-        pg.forEach(function (p) {
-          var ii = p.imageinfo && p.imageinfo[0]; if (!ii || !ii.thumburl) return;
-          var lic = (ii.extmetadata && ii.extmetadata.LicenseShortName && ii.extmetadata.LicenseShortName.value) || "";
-          if (!/public domain|cc0|^pd/i.test(lic)) return;
-          out.push({ id: "csvg-" + p.pageid, title: p.title.replace(/^File:/, "").replace(/\.[a-z]+$/i, "").replace(/_/g, " ").slice(0, 80), thumb: ii.thumburl, image: ii.thumburl, w: ii.thumbwidth, h: ii.thumbheight, alpha: true, credit: "Wikimedia Commons (" + lic + ")", link: ii.descriptionurl });
-        });
-        return out;
-      });
-    } },
-    commons: { label: "Wikimedia Commons", search: function (q, page) {
-      var u = "https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=40&gsroffset=" + (page * 40) + "&gsrsearch=" + encodeURIComponent(q + " filetype:bitmap") + "&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1200&iiextmetadatafilter=LicenseShortName|Artist";
-      return jget(u).then(function (d) {
-        var pg = d.query && d.query.pages ? Object.keys(d.query.pages).map(function (k) { return d.query.pages[k]; }) : [], out = [];
-        pg.forEach(function (p) {
-          var ii = p.imageinfo && p.imageinfo[0]; if (!ii || !ii.thumburl) return;
-          var lic = (ii.extmetadata && ii.extmetadata.LicenseShortName && ii.extmetadata.LicenseShortName.value) || "";
-          if (!/public domain|cc0|^pd/i.test(lic)) return;
-          var who = strip(ii.extmetadata && ii.extmetadata.Artist && ii.extmetadata.Artist.value);
-          out.push({ id: "commons-" + p.pageid, title: p.title.replace(/^File:/, "").replace(/\.[a-z]+$/i, "").replace(/_/g, " ").slice(0, 80), thumb: ii.thumburl, image: ii.thumburl, w: ii.thumbwidth, h: ii.thumbheight, credit: "Wikimedia Commons" + (who ? ", " + who : "") + " (" + lic + ")", link: ii.descriptionurl });
-        });
-        return out;
-      });
-    } },
-    aic: { label: "Art Institute of Chicago", search: function (q, page) {
-      var u = "https://api.artic.edu/api/v1/artworks/search?q=" + encodeURIComponent(q) + "&query[term][is_public_domain]=true&limit=40&page=" + (page + 1) + "&fields=id,title,image_id,artist_title,date_display,thumbnail";
-      return jget(u).then(function (d) {
-        return (d.data || []).filter(function (x) { return x.image_id; }).map(function (x) {
-          var r = x.thumbnail && x.thumbnail.width ? x.thumbnail.height / x.thumbnail.width : 1.3, base = "https://www.artic.edu/iiif/2/" + x.image_id;
-          return { id: "aic-" + x.id, title: x.title, thumb: base + "/full/260,/0/default.jpg", image: base + "/full/843,/0/default.jpg", w: 843, h: Math.round(843 * r), credit: "Art Institute of Chicago" + (x.artist_title ? ", " + x.artist_title : "") + " (public domain)", link: "https://www.artic.edu/artworks/" + x.id };
-        });
-      });
-    } },
-    cleveland: { label: "Cleveland Museum of Art", search: function (q, page) {
-      var u = "https://openaccess-api.clevelandart.org/api/artworks/?q=" + encodeURIComponent(q) + "&has_image=1&cc0=1&limit=40&skip=" + (page * 40);
-      return jget(u).then(function (d) {
-        return (d.data || []).filter(function (x) { return x.images && x.images.web && x.images.web.url; }).map(function (x) {
-          var w = x.images.web; return { id: "cma-" + x.id, title: x.title, thumb: w.url, image: w.url, w: +w.width || 900, h: +w.height || 1200, credit: "Cleveland Museum of Art" + (x.creators && x.creators[0] ? ", " + String(x.creators[0].description || "").split("(")[0].trim() : "") + " (CC0)", link: x.url };
-        });
-      });
-    } },
-    loc: { label: "Library of Congress", search: function (q, page) {
-      var u = "https://www.loc.gov/photos/?fo=json&c=40&sp=" + (page + 1) + "&q=" + encodeURIComponent(q);
-      return jget(u).then(function (d) {
-        var out = [];
-        (d.results || []).forEach(function (x) {
-          var imgs = (x.image_url || []).filter(Boolean); if (!imgs.length) return;
-          var best = null, bw = 0; imgs.forEach(function (s) { var m = /w=(\d+)/.exec(s), w = m ? +m[1] : 0; if (!best || Math.abs(w - 1000) < Math.abs(bw - 1000)) { best = s; bw = w; } });
-          var mh = /h=(\d+)/.exec(best); var url = best.replace(/#.*$/, "");
-          out.push({ id: "loc-" + String(x.id || x.url).replace(/[^a-z0-9]+/gi, "-").slice(-40), title: String(x.title || "Untitled").slice(0, 80), thumb: imgs[0].replace(/#.*$/, ""), image: url, w: bw || 900, h: mh ? +mh[1] : 700, credit: "Library of Congress", link: x.url });
-        });
-        return out;
-      });
-    } },
-    met: { label: "The Met (open access)", search: function (q, page) {
-      var u = "https://collectionapi.metmuseum.org/public/collection/v1/search?hasImages=true&isPublicDomain=true&q=" + encodeURIComponent(q);
-      return jget(u).then(function (d) {
-        var ids = (d.objectIDs || []).slice(page * 24, page * 24 + 24);
-        return Promise.all(ids.map(function (id) {
-          return jget("https://collectionapi.metmuseum.org/public/collection/v1/objects/" + id).then(function (x) {
-            if (!x.primaryImageSmall) return null;
-            return { id: "met-" + id, title: String(x.title || "Untitled").slice(0, 80), thumb: x.primaryImageSmall, image: x.primaryImage || x.primaryImageSmall, w: 900, h: 1100, credit: "The Metropolitan Museum of Art" + (x.artistDisplayName ? ", " + x.artistDisplayName : "") + " (public domain)", link: x.objectURL };
-          }).catch(function () { return null; });
-        })).then(function (l) { return l.filter(Boolean); });
-      });
-    } },
-    ia: { label: "Internet Archive (public-domain images)", search: function (q, page) {
-      var u = "https://archive.org/advancedsearch.php?output=json&rows=40&page=" + (page + 1) + "&fl[]=identifier&fl[]=title&q=" + encodeURIComponent("(" + q + ") AND mediatype:image AND (licenseurl:*publicdomain* OR collection:(biodivlibrary OR flickrcommons OR nasa))");
-      return jget(u).then(function (d) {
-        return ((d.response && d.response.docs) || []).map(function (x) {
-          var img = "https://archive.org/services/img/" + x.identifier;
-          return { id: "ia-" + x.identifier, title: String(x.title || x.identifier).slice(0, 80), thumb: img, image: img, w: 600, h: 600, credit: "Internet Archive (public domain)", link: "https://archive.org/details/" + x.identifier };
-        });
-      });
-    } },
-    nasa: { label: "NASA Image Library", search: function (q, page) {
-      var u = "https://images-api.nasa.gov/search?media_type=image&page_size=40&page=" + (page + 1) + "&q=" + encodeURIComponent(q);
-      return jget(u).then(function (d) {
-        var items = (d.collection && d.collection.items) || [];
-        return items.filter(function (x) { return x.links && x.links[0] && x.data && x.data[0]; }).map(function (x) {
-          var t = x.links[0].href, med = t.replace("~thumb", "~medium");
-          return { id: "nasa-" + x.data[0].nasa_id, title: String(x.data[0].title || "").slice(0, 80), thumb: t, image: med, w: 1000, h: 800, credit: "NASA (public domain)", link: "https://images.nasa.gov/details/" + encodeURIComponent(x.data[0].nasa_id) };
-        });
-      });
-    } },
-    openverse: { label: "Openverse (CC0 & public domain)", search: function (q, page) {
-      var u = "https://api.openverse.org/v1/images/?license=cc0,pdm&page_size=40&page=" + (page + 1) + "&q=" + encodeURIComponent(q);
-      return jget(u).then(function (d) {
-        return (d.results || []).map(function (x) {
-          return { id: "ov-" + x.id, title: String(x.title || "Untitled").slice(0, 80), thumb: x.thumbnail || x.url, image: x.thumbnail || x.url, w: x.width || 800, h: x.height || 800, credit: (x.source || "Openverse") + (x.creator ? ", " + x.creator : "") + " (" + (x.license === "pdm" ? "public domain" : "CC0") + ")", link: x.foreign_landing_url };
-        });
-      });
-    } }
-  };
-  var WF = { src: "commons", q: "", page: 0, results: [], busy: false };
-  var CHIPS = ["photochrom", "tintype", "cabinet card", "herbarium", "engraved bird", "teapot", "automobile 1920", "chair", "ship", "map", "moth", "cathedral"];
-  var CHIPS_ART = ["flourish", "ornament", "banner", "frame", "crown", "key", "bird", "hand", "eye", "arrow", "star", "ribbon"];
-  var CHIPS_ESO = ["eye", "anatomical eye", "alchemy", "astrology", "palmistry", "skull", "occult", "witchcraft", "demon", "sea monster", "ouroboros", "phrenology", "mushroom", "heart", "hand", "skeleton"];
-  function addFound(r) {
-    var probe = new Image();
-    probe.onload = function () { if (probe.naturalWidth) { r.w = probe.naturalWidth; r.h = probe.naturalHeight; } saveFound(r); };
-    probe.onerror = function () { r.image = prox(r.image); r.thumb = prox(r.thumb); saveFound(r); };
-    probe.src = r.image;
-  }
-  function saveFound(r) {
-    var it = byId[r.id];
-    if (!it) {
-      it = { id: r.id, category: "found", title: r.title, image: r.image, w: r.w, h: r.h, tags: [], credit: r.credit, link: r.link, web: true };
-      if (r.alpha) it.alpha = true;
-      ARCH.push(it); byId[it.id] = it; if (!it.alpha) PAGES.push(it);
-      FOUND.push(it); FOUND = FOUND.slice(-60); try { localStorage.setItem("cl.found", JSON.stringify(FOUND)); } catch (e) {}
-    }
-    closeModal(); setCat("found", 0);
-    var i = A.list.indexOf(it); if (i >= 0) { A.idx = i; renderPage(0); }
-    toast("PICKED UP.");
-  }
+  var FIELD = [
+    ["SEARCH MANY MUSEUMS AT ONCE", [
+      ["Museo", "https://museo.app", "museo.app", "one search box over a dozen great museums and libraries, all public-domain images. type a plain word (flower, frame, moth) and see what comes up."],
+      ["Public Work", "https://public.work", "public.work", "an endless canvas of public-domain prints, plates and engravings from The Met, the New York Public Library and more. drift around until something catches."]
+    ]],
+    ["ART & MUSEUMS", [
+      ["The Met, Open Access", "https://www.metmuseum.org/art/collection/search?showOnly=openAccess&hasImages=true", "metmuseum.org", "hundreds of thousands of CC0 images: prints, textiles, drawings, photographs, objects. tick \u201cOpen Access\u201d in the filters."],
+      ["Art Institute of Chicago", "https://www.artic.edu/collection?is_public_domain=true", "artic.edu", "paintings, prints, Japanese woodblocks, textiles. the public-domain filter is already switched on in this link."],
+      ["Rijksmuseum, Rijksstudio", "https://www.rijksmuseum.nl/en/rijksstudio", "rijksmuseum.nl", "Dutch masters, but also botanical drawings, ornament prints, tiles and strange small things. high-resolution downloads, free to use."],
+      ["Cleveland Museum of Art", "https://www.clevelandart.org/art/collection/search?filter=cc0", "clevelandart.org", "a CC0 collection with a good eye: tapestries, armour, drawings, Asian art, photography."],
+      ["Smithsonian Open Access", "https://www.si.edu/openaccess", "si.edu", "millions of CC0 images across the Smithsonian: natural history, portraits, design, ephemera. search, then filter for \u201cCC0\u201d."],
+      ["SMK, the National Gallery of Denmark", "https://open.smk.dk/en", "open.smk.dk", "high-resolution public-domain art, including lovely odd corners of the Danish golden age and Nordic prints."]
+    ]],
+    ["BOTANY & NATURAL HISTORY", [
+      ["Biodiversity Heritage Library", "https://www.biodiversitylibrary.org", "biodiversitylibrary.org", "centuries of natural-history books: botanical plates, birds, insects, sea creatures. most is public domain; read the rights line on each page."],
+      ["Internet Archive Book Images", "https://www.flickr.com/photos/internetarchivebookimages/", "flickr.com", "millions of illustrations pulled from old books, with the surrounding text. no known copyright restrictions. search by tag."],
+      ["Wikimedia Commons", "https://commons.wikimedia.org", "commons.wikimedia.org", "the biggest of them all. add \u201cpublic domain\u201d to your search, or look inside the Category pages for plants, moths, maps and plates."]
+    ]],
+    ["PHOTOGRAPHS & EPHEMERA", [
+      ["Library of Congress, Free to Use", "https://www.loc.gov/free-to-use/", "loc.gov", "curated sets of rights-cleared photographs, posters, maps and cartoons. street scenes, signs, portraits, old America."],
+      ["NYPL Digital Collections", "https://digitalcollections.nypl.org/collections?filters%5Brights%5D=pd", "digitalcollections.nypl.org", "maps, menus, theatre posters, photographs, pattern books. the link is already set to public-domain items."],
+      ["Rawpixel, Public Domain", "https://www.rawpixel.com/public-domain", "rawpixel.com", "a tidy, browsable set of CC0 art and vintage illustration. an account may be asked for; check each image says \u201cpublic domain\u201d."],
+      ["Modem Studio, CC0 Images", "https://img.modem.studio", "img.modem.studio", "a random scatter of CC0 photographs: objects, animals, odd machines. good for surprise."],
+      ["NASA Image and Video Library", "https://images.nasa.gov", "images.nasa.gov", "moons, nebulae, planets, rockets, spacesuits. NASA images are generally free to use; check the credit line."]
+    ]],
+    ["ODD, OLD & ESOTERIC", [
+      ["Wellcome Collection", "https://wellcomecollection.org/search/images", "wellcomecollection.org", "alchemy, anatomy, astrology, folk medicine, occult diagrams. under \u201cLicences\u201d tick public domain mark and CC0."],
+      ["The Public Domain Review", "https://publicdomainreview.org/collections/", "publicdomainreview.org", "curated collections of strange and wonderful old things, each with direct links to the public-domain originals."]
+    ]]
+  ];
   function openWider() {
-    var h = '<h2>THE WIDER FIELD</h2><p class="sub">borrow from the great open collections. public-domain finds only. tap one to carry it back to camp.</p>' +
-      '<div class="wf-bar"><select id="wfSrc" class="sel" aria-label="Collection">' + Object.keys(SOURCES).map(function (k) { return '<option value="' + k + '"' + (k === WF.src ? " selected" : "") + ">" + SOURCES[k].label + "</option>"; }).join("") + '</select>' +
-      '<input id="wfQ" type="search" placeholder="what are you hunting for?" value="' + esc(WF.q) + '"><button class="btn primary" id="wfGo">LOOK</button></div>' +
-      '<div class="wf-chips">' + CHIPS.map(function (c) { return '<button class="chip" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
-      '<p class="sub wf-eso">CLIP ART · public-domain drawings and diagrams from Wikimedia Commons, already free of their background</p><div class="wf-chips">' + CHIPS_ART.map(function (c) { return '<button class="chip art" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
-      '<p class="sub wf-eso">ESOTERICA · eyes, hands, hearts, alchemy and other odd old things (Wellcome Collection)</p><div class="wf-chips">' + CHIPS_ESO.map(function (c) { return '<button class="chip eso" data-q="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + '</div>' +
-      '<p class="wf-msg" id="wfMsg">' + (WF.results.length ? "" : "try a word. any word. see what turns up.") + '</p><div class="bg-grid wf-grid" id="wfGrid"></div><div class="row"><button class="btn" id="wfMore" hidden>MORE</button></div>';
-    openModal(h); drawResults();
-    function go(more) {
-      var q = $("#wfQ").value.trim(); if (!q) { $("#wfQ").focus(); return; }
-      WF.src = $("#wfSrc").value; if (!more) { WF.q = q; WF.page = 0; WF.results = []; } else WF.page++;
-      $("#wfMsg").textContent = "looking…"; $("#wfMore").hidden = true;
-      SOURCES[WF.src].search(WF.q, WF.page).then(function (list) {
-        WF.results = WF.results.concat(list); drawResults();
-        $("#wfMsg").textContent = WF.results.length ? "" : "nothing turned up. try a stranger word, or another collection.";
-        $("#wfMore").hidden = !list.length;
-      }).catch(function (e) {
-        $("#wfMsg").textContent = "this collection didn't answer (" + ((e && e.message) || "no reply") + "). try another one, or look again in a moment.";
+    var h = '<h2>THE WIDER FIELD</h2><p class="sub">free, public-domain places to hunt. open one, find something that speaks to you, <b>download it</b>, then bring it home with <b>YOUR OWN PIECES</b>. use <b>LIFT BACKGROUND</b> on the workbench to cut it free.</p>';
+    FIELD.forEach(function (sec) {
+      h += '<p class="sub wf-eso">' + esc(sec[0]) + '</p><div class="wf-links">';
+      sec[1].forEach(function (p) {
+        h += '<a class="wf-link" href="' + esc(p[1]) + '" target="_blank" rel="noopener noreferrer"><b>' + esc(p[0]) + '</b><i>' + esc(p[2]) + ' ↗</i><span>' + esc(p[3]) + '</span></a>';
       });
-    }
-    function drawResults() {
-      $("#wfGrid").innerHTML = WF.results.map(function (r, i) { return '<button data-i="' + i + '"><img loading="lazy" alt="" src="' + esc(r.thumb) + '" data-p="' + esc(prox(r.thumb)) + '"><span>' + esc(r.title) + "</span></button>"; }).join("");
-      $$("#wfGrid img").forEach(function (im) { im.onerror = function () { im.onerror = function () { im.parentNode.style.display = "none"; }; im.src = im.dataset.p; }; });
-      $$("#wfGrid [data-i]").forEach(function (b) { b.onclick = function () { addFound(WF.results[+b.dataset.i]); }; });
-    }
-    $("#wfGo").onclick = function () { go(false); };
-    $("#wfMore").onclick = function () { go(true); };
-    $("#wfQ").onkeydown = function (e) { if (e.key === "Enter") go(false); };
-    $$(".wf-chips .chip").forEach(function (c) { c.onclick = function () { $("#wfQ").value = c.dataset.q; if (c.classList.contains("eso")) $("#wfSrc").value = "wellcome"; if (c.classList.contains("art")) $("#wfSrc").value = "commonssvg"; go(false); }; });
-    if (WF.results.length) $("#wfMore").hidden = false;
+      h += '</div>';
+    });
+    h += '<p class="sub wf-eso" style="margin-top:14px">A NOTE ON LICENCES · always glance at the rights line next to an image. look for “public domain”, “CC0” or “no known copyright restrictions”. if it says anything else, leave it on the shelf.</p>';
+    openModal(h);
   }
   $("#btnWide").onclick = openWider;
 

@@ -314,3 +314,10 @@ body[data-view="archive"] .drawer, body[data-view="cut"] .drawer { display: bloc
 .lf-row { margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
 .lf-name { flex: 1 1 160px; min-width: 0; min-height: 40px; padding: 8px 10px; background: var(--paper); color: var(--ink); border: 1px solid var(--ink); font: inherit; font-size: 17px; }
 .lf-note { font-size: 13px; }
+
+.wf-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.wf-link { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; background: var(--paper); border: 1px dashed var(--ink); color: var(--ink); text-decoration: none; }
+.wf-link:hover { background: var(--ink); color: var(--paper); }
+.wf-link b { font-size: 15px; letter-spacing: .03em; }
+.wf-link i { font-size: 12px; opacity: .7; }
+.wf-link span { font-size: 13px; line-height: 1.35; }
