@@ -34,6 +34,13 @@
   function rrPath(r, cr) { var ry = cr * r; return "M" + cr + ",0 H" + (1 - cr) + " A" + cr + "," + ry + " 0 0 1 1," + ry + " V" + (1 - ry) + " A" + cr + "," + ry + " 0 0 1 " + (1 - cr) + ",1 H" + cr + " A" + cr + "," + ry + " 0 0 1 0," + (1 - ry) + " V" + ry + " A" + cr + "," + ry + " 0 0 1 " + cr + ",0Z"; }
   function starPath() { var d = ""; for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 0.2 : 0.5; d += (i ? "L" : "M") + (0.5 + Math.cos(a) * r).toFixed(3) + "," + (0.5 + Math.sin(a) * r).toFixed(3); } return d + "Z"; }
   function flowerPath(n) { var d = "", N = 120; for (var i = 0; i < N; i++) { var a = -Math.PI / 2 + i * 2 * Math.PI / N, r = 0.36 + 0.14 * Math.abs(Math.cos(n * (a + Math.PI / 2) / 2)); d += (i ? "L" : "M") + (0.5 + Math.cos(a) * r).toFixed(3) + "," + (0.5 + Math.sin(a) * r).toFixed(3); } return d + "Z"; }
+  function spiralPath(seed) { var st = seed * 9301 + 49297; function rnd() { st = (st * 9301 + 49297) % 233280; return st / 233280; }
+    var turns = 2.6, N = 140, ph = rnd() * 6.28, L = [], R = [];
+    for (var i = 0; i <= N; i++) { var t = i / N, a = t * turns * 2 * Math.PI, r = 0.06 + 0.94 * t, wob = 1 + 0.07 * Math.sin(a * 1.7 + ph) + (rnd() - 0.5) * 0.05;
+      var w = (0.05 + 0.06 * t) * (1 + 0.45 * Math.sin(a * 0.9 + ph * 2)) * (i < 6 ? 0.5 + i / 12 : 1) * (i > N - 5 ? 0.6 + (N - i) / 12 : 1);
+      var cx = Math.cos(a), cy = Math.sin(a), rc = r * wob; L.push([cx * (rc + w), cy * (rc + w)]); R.push([cx * Math.max(rc - w, 0.01), cy * Math.max(rc - w, 0.01)]); }
+    var pts = L.concat(R.reverse()), x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; pts.forEach(function (p) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+    return pts.map(function (p, i) { return (i ? "L" : "M") + ((p[0] - x0) / (x1 - x0)).toFixed(3) + "," + ((p[1] - y0) / (y1 - y0)).toFixed(3); }).join("") + "Z"; }
   function tornPath(seed, kind) { var st = seed * 9301 + 49297; function rnd() { st = (st * 9301 + 49297) % 233280; return st / 233280; }
     var N = 90, pts = [], ph = rnd() * 6.28, ph2 = rnd() * 6.28;
     for (var i = 0; i < N; i++) { var t = i / N, a = t * 2 * Math.PI, c = Math.cos(a), sn = Math.sin(a), rr;
@@ -71,6 +78,8 @@
     { id: "house", label: "House", r: 1, d: "M.5,.02 L.98,.45 H.86 V.98 H.14 V.45 H.02Z" },
     { id: "pine", label: "Pine tree", r: 0.71, d: "M.5,0 L.82,.4 H.68 L.95,.75 H.56 V1 H.44 V.75 H.05 L.32,.4 H.18Z" },
     { id: "hexagon", label: "Hexagon", r: 1.1, d: "M.25,.04 H.75 L1,.5 L.75,.96 H.25 L0,.5Z" },
+    { id: "spiral", label: "Spiral", r: 1, d: spiralPath(4) },
+    { id: "spiral-2", label: "Spiral, loose", r: 1, d: spiralPath(17) },
     { id: "torn-a", label: "Torn scrap A", r: 1.2, d: tornPath(3, "sheet") },
     { id: "torn-b", label: "Torn scrap B", r: 0.85, d: tornPath(11, "sheet") },
     { id: "torn-c", label: "Torn strip", r: 2.6, d: tornPath(7, "sheet") },
