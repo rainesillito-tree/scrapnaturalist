@@ -58,3 +58,7 @@ Painted procedurally by `tools/make_overlays.py` and the starburst generator (no
 ## Skeletons (Nov 13)
 - sk-*: Rai's own drawings (the Eternal Companions: flower crown and cosmic halo skeletons), cut from her character sheets. Skeletons with serious anatomy problems (fused or missing bones, tangled limbs) were left out.
 - Small motifs (stars, moon, galaxy, flowers, butterfly) come from the same sheets and are hers.
+
+
+### Skeletons, second batch
+More of Rai's own skeleton drawings (galaxy-brain pairs, mushroom dancers, jar, tea party, heart bouquet, vine wreath), cut from her scans and renders. Furniture and background removed where it could be separated; plants that overlap the bones are kept.
