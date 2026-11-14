@@ -62,3 +62,7 @@ Painted procedurally by `tools/make_overlays.py` and the starburst generator (no
 
 ### Skeletons, second batch
 More of Rai's own skeleton drawings (galaxy-brain pairs, mushroom dancers, jar, tea party, heart bouquet, vine wreath), cut from her scans and renders. Furniture and background removed where it could be separated; plants that overlap the bones are kept.
+
+
+### Botanical ink drawings
+Five pen drawings by Rai Sillito / The Luminarium (hanging sprigs, umbel flower, tulip, spray of buds), photographed on paper and lifted off as transparent line art. © the artist.
