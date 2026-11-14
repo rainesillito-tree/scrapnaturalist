@@ -66,3 +66,7 @@ More of Rai's own skeleton drawings (galaxy-brain pairs, mushroom dancers, jar, 
 
 ### Botanical ink drawings
 Five pen drawings by Rai Sillito / The Luminarium (hanging sprigs, umbel flower, tulip, spray of buds), photographed on paper and lifted off as transparent line art. © the artist.
+
+
+### People cut from photographs
+Nine figures cut from photographs Rai supplied: the Annie Spratt and Ann Danilina images, the Huron County Museum Historic Gaol image and the New York Public Library image come from Unsplash (Unsplash licence, free to use but not public domain); one photographer image has no source recorded. Check each licence before publishing anything beyond personal collage.
