@@ -70,3 +70,6 @@ Five pen drawings by Rai Sillito / The Luminarium (hanging sprigs, umbel flower,
 
 ### People cut from photographs
 Nine figures cut from photographs Rai supplied: the Annie Spratt and Ann Danilina images, the Huron County Museum Historic Gaol image and the New York Public Library image come from Unsplash (Unsplash licence, free to use but not public domain); one photographer image has no source recorded. Check each licence before publishing anything beyond personal collage.
+
+## Botanical ink drawings, second set
+Five pen-and-ink sprigs and blooms drawn by Rai Sillito / The Luminarium, photographed and extracted to transparent line art. Original work, labelled as hers.
