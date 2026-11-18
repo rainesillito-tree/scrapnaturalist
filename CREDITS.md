@@ -73,3 +73,6 @@ Nine figures cut from photographs Rai supplied: the Annie Spratt and Ann Danilin
 
 ## Botanical ink drawings, second set
 Five pen-and-ink sprigs and blooms drawn by Rai Sillito / The Luminarium, photographed and extracted to transparent line art. Original work, labelled as hers.
+
+## Collage moths
+Eight cut-paper-style moth studies (halftone wings, torn-paper bodies), made by Rai Sillito / The Luminarium with AI image generation and extracted to transparent cutouts. Her own generated work, labelled as hers.
